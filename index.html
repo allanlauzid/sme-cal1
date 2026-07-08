@@ -550,8 +550,14 @@ function doExportOnline(){
   const name = getExportName();
   const body = document.getElementById('utilModalBody');
   body.innerHTML = '<h3>Enviando...</h3><p class="util-empty">Salvando sugestões na planilha, aguarde.</p>';
-  sendSnapshotToSheet(name)
-    .then(() => {
+  sendSnapshotToSheet(name, (done, total) => {
+    body.innerHTML = `<h3>Enviando...</h3><p class="util-empty">Salvando post ${done} de ${total}, aguarde.</p>`;
+  })
+    .then((sentCount) => {
+      if(sentCount === 0){
+        body.innerHTML = '<h3>Nada para enviar</h3><p class="util-empty">Você ainda não fez nenhuma sugestão de edição neste calendário.</p><div class="btn-row"><button class="opt-cancel" onclick="closeUtilModal()">Fechar</button></div>';
+        return;
+      }
       body.innerHTML = '<h3>Salvo!</h3><p class="util-empty">Suas sugestões foram enviadas para a nuvem.</p><div class="btn-row"><button class="opt-primary" onclick="closeUtilModal()">OK</button></div>';
     })
     .catch(err => {
@@ -560,10 +566,24 @@ function doExportOnline(){
     });
 }
 
-function sendSnapshotToSheet(name){
+// Envia um POST por post (não um pacote gigante com o calendário inteiro),
+// para evitar ERR_CONNECTION_CLOSED por corpo de requisição muito grande.
+// Cada post enviado inclui SEMPRE todos os campos (respondidos ou não).
+// Posts sem nenhuma sugestão de edição são descartados (não enviados).
+async function sendSnapshotToSheet(name, onProgress){
   const sessionId = slug(name) + '_' + timestampLabel(new Date());
   const sessLabel = new Date().toLocaleString('pt-BR');
-  const postsPayload = posts.map((p, idx) => {
+
+  const toSend = [];
+  posts.forEach((p, idx) => {
+    const postSug = suggestions[idx];
+    if(!postSug || Object.keys(postSug).length === 0) return;
+    toSend.push(idx);
+  });
+
+  let sent = 0;
+  for(const idx of toSend){
+    const p = posts[idx];
     const keys = fieldKeysForPost(p);
     const changes = {};
     keys.forEach(key => {
@@ -572,18 +592,20 @@ function sendSnapshotToSheet(name){
       const sug = (suggestions[idx] && suggestions[idx][key]) || '';
       changes[key] = { label, original, sugestao: sug };
     });
-    return {
-      postId: idx, data: p['Data'], dow: diaSemana(p['Data']),
-      tipo: p['Formato'], titulo: p['Segmento/Página'], changes
+    const payload = {
+      editor: name, sessionId, sessionLabel: sessLabel,
+      posts: [{ postId: idx, data: p['Data'], dow: diaSemana(p['Data']), tipo: p['Formato'], titulo: p['Segmento/Página'], changes }]
     };
-  });
-  const payload = { editor: name, sessionId, sessionLabel: sessLabel, posts: postsPayload };
-  return fetch(SHEET_WEBAPP_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(payload)
-  });
+    await fetch(SHEET_WEBAPP_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+    sent++;
+    if(onProgress) onProgress(sent, toSend.length);
+  }
+  return sent;
 }
 
 // ---- Importar ----
