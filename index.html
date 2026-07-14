@@ -155,11 +155,14 @@
   .user-badge:hover{background:rgba(255,255,255,.16);}
 
   /* LOGIN MACRO */
-  .login-modal{background:#fff; width:100%; max-width:380px; border-radius:14px; padding:26px 24px; text-align:center;}
+  .login-modal{position:relative; background:#fff; width:100%; max-width:380px; border-radius:14px; padding:26px 24px; text-align:center;}
+  .login-modal .close{position:absolute; top:14px; right:14px; border:none; background:#eef1f5; width:30px; height:30px; border-radius:50%; font-size:14px; cursor:pointer; color:var(--muted);}
   .login-modal h3{margin:0 0 6px; font-size:17px; color:var(--navy);}
   .login-modal p{margin:0 0 18px; font-size:12.5px; color:var(--muted);}
   .login-user-btn{display:block; width:100%; border:1px solid var(--border); background:#fff; color:var(--navy); font-weight:700; font-size:14px; padding:13px; border-radius:10px; margin-bottom:10px; cursor:pointer;}
   .login-user-btn:hover{border-color:var(--gold); background:#fffaf0;}
+  .guest-link{display:inline-block; margin-top:6px; background:none; border:none; color:var(--muted); font-size:12.5px; text-decoration:underline; cursor:pointer; padding:4px;}
+  .guest-link:hover{color:var(--navy);}
   .login-modal input[type=password]{width:100%; padding:12px; border:1px solid var(--border); border-radius:8px; font-size:16px; text-align:center; letter-spacing:4px; margin-bottom:12px;}
   .login-error{color:var(--reels); font-size:12px; margin:-6px 0 12px; display:none;}
 
@@ -303,13 +306,15 @@
 </div>
 
 <div class="util-backdrop" id="loginBackdrop">
-  <div class="login-modal">
+  <div class="util-modal login-modal">
+    <button type="button" class="close" onclick="closeLoginModal()">✕</button>
     <div id="loginStep1">
       <h3>Quem está editando?</h3>
       <p>Identifique-se para continuar.</p>
       <button class="login-user-btn" onclick="selectLoginUser('Victor Moraes')">Victor Moraes</button>
       <button class="login-user-btn" onclick="selectLoginUser('Pedro Cavani')">Pedro Cavani</button>
       <button class="login-user-btn" onclick="selectLoginUser('Allan Lauzid')">Allan Lauzid</button>
+      <button type="button" class="guest-link" id="guestLink" onclick="accessAsGuest()" style="display:none;">Acessar sem fazer login</button>
     </div>
     <div id="loginStep2" style="display:none;">
       <h3 id="loginUserLabel">—</h3>
@@ -461,7 +466,7 @@ function enterCampaign(id){
     document.getElementById('landingView').style.display = 'none';
     document.getElementById('appView').style.display = 'block';
     renderAll();
-  });
+  }, { allowGuest: true });
 }
 
 function renderLandingList(){
@@ -590,6 +595,7 @@ let currentPostIdx = null;
 // ---- Login / identificação do usuário ----
 const CURRENT_USER_KEY = 'sme_current_user_v1';
 let currentUser = null; // {id, name}
+let isGuest = false; // acesso "somente leitura", sem identificação
 let pendingLoginCallback = null;
 let loginSelectedName = null;
 
@@ -603,19 +609,38 @@ function tryRestoreSession(){
 function updateUserBadge(){
   const el = document.getElementById('currentUserBadge');
   if(!el) return;
-  el.textContent = currentUser ? ('👤 ' + currentUser.name) : '';
+  if(currentUser) el.textContent = '👤 ' + currentUser.name;
+  else if(isGuest) el.textContent = '👁 Visitante (somente leitura)';
+  else el.textContent = '';
 }
 
-function requireLogin(onSuccess){
-  if(currentUser){ onSuccess(); return; }
-  openLoginModal(onSuccess);
+// opts.allowGuest = true permite mostrar o link "Acessar sem fazer login"
+// (usado só para entrar na campanha; nunca para liberar uma edição)
+function requireLogin(onSuccess, opts){
+  const allowGuest = !!(opts && opts.allowGuest);
+  if(currentUser || (allowGuest && isGuest)){ onSuccess(); return; }
+  openLoginModal(onSuccess, allowGuest);
 }
 
-function openLoginModal(onSuccess){
+function openLoginModal(onSuccess, allowGuest){
   pendingLoginCallback = onSuccess || null;
   document.getElementById('loginStep1').style.display = 'block';
   document.getElementById('loginStep2').style.display = 'none';
+  document.getElementById('guestLink').style.display = allowGuest ? 'inline-block' : 'none';
   document.getElementById('loginBackdrop').classList.add('active');
+}
+
+function closeLoginModal(){
+  pendingLoginCallback = null;
+  document.getElementById('loginBackdrop').classList.remove('active');
+}
+
+function accessAsGuest(){
+  isGuest = true;
+  document.getElementById('loginBackdrop').classList.remove('active');
+  updateUserBadge();
+  const cb = pendingLoginCallback; pendingLoginCallback = null;
+  if(cb) cb();
 }
 
 function selectLoginUser(name){
@@ -644,11 +669,13 @@ async function submitLoginPin(){
 }
 
 function logoutUser(){
-  if(!currentUser) return;
-  if(!confirm('Trocar de usuário identificado?')) return;
+  if(!currentUser && !isGuest) return;
+  if(!confirm('Sair da identificação atual?')) return;
   currentUser = null;
+  isGuest = false;
   try{ sessionStorage.removeItem(CURRENT_USER_KEY); }catch(e){}
   updateUserBadge();
+  backToLanding();
 }
 
 function escapeHtml(s){ const d = document.createElement('div'); d.innerText = s == null ? '' : s; return d.innerHTML; }
