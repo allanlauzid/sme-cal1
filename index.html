@@ -216,13 +216,78 @@
   .landing-toggle button{color:var(--navy);}
   .landing-toggle button.active{background:var(--gold); color:#fff;}
   .campaign-card{max-width:420px; margin:0 auto;}
+
+  /* Cabeçalho centralizado (landing e campanha) */
+  .topbar-centered{max-width:1200px; margin:0 auto; text-align:center;}
+  .topbar-centered h1{margin:0 0 4px; font-size:20px;}
+  .topbar-centered p{margin:0 0 14px; font-size:13px; color:#c9d3e0;}
+  .topbar-centered .view-toggle{margin:0 auto; width:fit-content;}
+  .landing-subtitle{text-align:center; color:var(--muted); font-size:13px; margin:-14px 0 24px;}
+
+  /* Sidebar retrátil (desktop) */
+  .hamburger-btn{position:fixed; top:14px; right:14px; z-index:700; border:none; background:var(--navy); color:#fff; width:38px; height:38px; border-radius:9px; font-size:17px; cursor:pointer; display:block;}
+  @media (min-width:761px){ .hamburger-btn{left:14px; right:auto;} }
+  .sidebar-overlay{display:none; position:fixed; inset:0; background:rgba(4,20,50,.35); z-index:650;}
+  .sidebar-overlay.open{display:block;}
+  .sidebar{position:fixed; top:0; left:0; bottom:0; width:230px; background:#fff; box-shadow:2px 0 18px rgba(4,20,50,.18); z-index:680; padding:64px 14px 14px; display:flex; flex-direction:column; gap:8px; transform:translateX(-100%); transition:transform .2s ease;}
+  .sidebar.open{transform:translateX(0);}
+  .sidebar-head{font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:4px;}
+  .sidebar-btn{display:flex; align-items:center; gap:8px; width:100%; text-align:left; border:1px solid var(--border); background:#fff; color:var(--navy); font-size:13px; font-weight:600; padding:10px 12px; border-radius:9px; cursor:pointer;}
+  .sidebar-btn:hover{border-color:var(--gold); background:#fffaf0;}
+  .sidebar-offline{position:relative;}
+  .sidebar-offline .offline-menu{position:static; box-shadow:none; border:none; margin-top:4px; display:none;}
+  .sidebar-offline .offline-menu.open{display:block;}
+
+  /* Painel de filtros (aberto pelo botão Filtros da sidebar) */
+  .filters-panel{display:none; margin-bottom:18px;}
+  .filters-panel.open{display:block;}
+
+  /* Correção: modal do post precisa cobrir o cabeçalho */
+  .backdrop{z-index:900;}
+  .util-backdrop{z-index:900;}
+
+  /* Catraca de etapa do Kanban dentro do modal */
+  .stage-ratchet-wrap{display:flex; justify-content:flex-end; align-items:center; gap:6px; margin:-4px 0 10px;}
+  .stage-ratchet{display:flex; align-items:center; gap:4px; background:#f4f6f9; border-radius:20px; padding:3px 4px;}
+  .sr-arrow{border:none; background:#fff; width:22px; height:22px; border-radius:50%; font-size:11px; color:var(--navy); cursor:pointer; box-shadow:0 1px 2px rgba(4,20,50,.12);}
+  .sr-arrow:disabled{opacity:.35; cursor:default;}
+  .sr-label{font-size:10.5px; font-weight:700; color:var(--navy); padding:0 6px; white-space:nowrap;}
+  .stage-select-mini{border:1px solid var(--border); background:#fff; border-radius:20px; font-size:11px; color:var(--muted); padding:5px 8px; max-width:110px;}
+
+  /* Bolinhas de revisão nos cards */
+  .review-dots{display:flex; gap:3px; align-items:center;}
+
+  /* Badges nos cards da Lista */
+  .list-badges{display:flex; flex-direction:column; align-items:center; gap:3px;}
+  .pub-badge-outline{display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:50%; background:transparent; border:1px solid var(--navy); color:var(--navy); font-size:9px; font-weight:700;}
 </style>
 </head>
 <body>
 
+<button type="button" class="hamburger-btn" id="hamburgerBtn" onclick="toggleSidebar()" title="Menu">☰</button>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-head">Menu</div>
+  <button type="button" class="sidebar-btn" id="sbPerfil" onclick="logoutUser()">👤 <span id="sbPerfilLabel">Perfil</span></button>
+  <button type="button" class="sidebar-btn" onclick="backToLanding()">🗂 Campanhas</button>
+  <button type="button" class="sidebar-btn" id="btnSalvar" onclick="salvarTudo()">💾 Salvar</button>
+  <div class="sidebar-offline" id="offlineWrap">
+    <button type="button" class="sidebar-btn" onclick="toggleOfflineMenu()">📦 Offline ▾</button>
+    <div class="offline-menu" id="offlineMenu">
+      <button onclick="doExportTxt()">Exportar (.txt)</button>
+      <button onclick="doImportTxt()">Importar (.txt)</button>
+    </div>
+  </div>
+  <button type="button" class="sidebar-btn" onclick="confirmNovo()">↺ Novo</button>
+  <button type="button" class="sidebar-btn" onclick="toggleFiltersPanel()">🔎 Filtros</button>
+  <input type="file" id="importFile" accept=".txt" style="display:none" onchange="importSuggestions(event)">
+</nav>
+
 <div id="landingView">
   <div class="landing-wrap">
-    <h1 class="landing-title">Calendário Editorial Sá Moraes Engenharia PE/PB</h1>
+    <h1 class="landing-title">Calendário Editorial · Sá Moraes Engenharia PE/PB</h1>
+    <p class="landing-subtitle" id="landingSubtitle">Escolha uma campanha para começar</p>
     <div class="view-toggle landing-toggle">
       <button id="landBtnList" class="active" onclick="setLandingView('list')">Lista</button>
       <button id="landBtnKanban" onclick="setLandingView('kanban')">Kanban</button>
@@ -237,26 +302,10 @@
 <div id="appView" style="display:none;">
 
 <header>
-  <div class="topbar">
-    <button class="novo-btn" onclick="backToLanding()" style="margin-right:2px;">← Campanhas</button>
-    <button class="novo-btn" onclick="confirmNovo()">↺ Novo</button>
-    <div>
-      <h1>Calendário Editorial · Sá Moraes Engenharia PE/PB</h1>
-      <p>51 posts · 20/07 a 23/08/2026 · Stories, Feed e Reels por segmento</p>
-    </div>
-    <div class="header-actions">
-      <span class="user-badge" id="currentUserBadge" onclick="logoutUser()" title="Clique para trocar de usuário"></span>
-      <button class="save-btn" id="btnSalvar" onclick="salvarTudo()">💾 Salvar</button>
-      <div class="offline-wrap" id="offlineWrap">
-        <button class="offline-btn" onclick="toggleOfflineMenu()">Offline ▾</button>
-        <div class="offline-menu" id="offlineMenu">
-          <button onclick="doExportTxt()">Exportar (.txt)</button>
-          <button onclick="doImportTxt()">Importar (.txt)</button>
-        </div>
-      </div>
-      <input type="file" id="importFile" accept=".txt" style="display:none" onchange="importSuggestions(event)">
-    </div>
-    <div class="view-toggle">
+  <div class="topbar-centered">
+    <h1>Calendário Editorial · Sá Moraes Engenharia PE/PB</h1>
+    <p id="appSubtitle">51 posts · 20/07 a 23/08/2026 · Stories, Feed e Reels por segmento</p>
+    <div class="view-toggle landing-toggle">
       <button id="btnList" class="active" onclick="setView('list')">Lista</button>
       <button id="btnKanban" onclick="setView('kanban')">Kanban</button>
       <button id="btnCal" onclick="setView('cal')">Calendário</button>
@@ -266,18 +315,20 @@
 
 <div class="wrap">
 
-  <div class="toolbar">
-    <input type="text" id="searchBox" placeholder="Buscar por segmento, gancho ou tema..." oninput="renderAll()">
-    <span class="chip" id="chipStories" onclick="toggleFormato('Stories')">Stories</span>
-    <span class="chip" id="chipFeed" onclick="toggleFormato('Feed')">Feed</span>
-    <span class="chip" id="chipReels" onclick="toggleFormato('Reels')">Reels</span>
-    <select id="pubFilter" onchange="renderAll()"><option value="">Todos os públicos</option></select>
-    <button class="legend-btn" onclick="toggleLegend()">Legenda de públicos ▾</button>
-  </div>
-
-  <div class="legend-panel" id="legendPanel">
-    <b>Legenda de Público-alvo</b>
-    <div class="legend-grid" id="legendGrid"></div>
+  <div class="filters-panel" id="filtersPanel">
+    <div class="toolbar">
+      <input type="text" id="searchBox" placeholder="Buscar por segmento, gancho ou tema..." oninput="renderAll()">
+      <span class="chip" id="chipStories" onclick="toggleFormato('Stories')">Stories</span>
+      <span class="chip" id="chipFeed" onclick="toggleFormato('Feed')">Feed</span>
+      <span class="chip" id="chipReels" onclick="toggleFormato('Reels')">Reels</span>
+      <select id="pubFilter" onchange="renderAll()"><option value="">Todos os públicos</option></select>
+      <select id="kanbanFilter" onchange="renderAll()"><option value="">Todas as etapas do Kanban</option></select>
+      <button class="legend-btn" onclick="toggleLegend()">Legenda de públicos ▾</button>
+    </div>
+    <div class="legend-panel" id="legendPanel">
+      <b>Legenda de Público-alvo</b>
+      <div class="legend-grid" id="legendGrid"></div>
+    </div>
   </div>
 
   <div id="listView"></div>
@@ -349,7 +400,21 @@ async function loadPostsFromSupabase(){
     posts = [];
     return;
   }
-  posts = data.map(row => ({ ...row.fields, __id: row.id, __kanban: row.kanban_stage }));
+  // posts[id] = objeto do post — indexado pelo id real do banco (não pela posição),
+  // assim vários funcionam corretamente mesmo com várias campanhas misturadas na mesma tabela.
+  posts = [];
+  data.forEach(row => {
+    posts[row.id] = { ...row.fields, __id: row.id, __kanban: row.kanban_stage, __campaignId: row.campaign_id };
+  });
+}
+
+let CAMPAIGNS = [];
+let currentCampaignId = null;
+
+async function loadCampaigns(){
+  const { data, error } = await sb.from('campaigns').select('*').order('created_at', { ascending: true });
+  if(error){ console.warn(error); CAMPAIGNS = []; return; }
+  CAMPAIGNS = (data||[]).map(c => ({ id: c.id, title: c.title, subtitle: c.subtitle || '', dateStart: c.date_start, dateEnd: c.date_end }));
 }
 
 // reverse label -> full text
@@ -367,13 +432,10 @@ const CAMPAIGN_STAGES = [
   'Em desenvolvimento', 'Pronto para análise', 'Em análise', 'Em revisão',
   'Pronto para postar', 'Em publicação', 'Publicado', 'Cancelado'
 ];
-const CAMPAIGNS = [
-  { id: 'avcb', title: 'AVCB 20/07 a 23/08/2026', subtitle: '51 posts · Stories, Feed e Reels por segmento' }
-];
 let dragIdx = null;
 
-function computeCampaignStage(){
-  const stages = posts.map(p => p.__kanban || 2);
+function computeCampaignStage(campaignId){
+  const stages = posts.filter(p => p && p.__campaignId === campaignId).map(p => p.__kanban || 2);
   if(!stages.length) return 1;
   const allEqual = v => stages.every(s => s === v);
   if(allEqual(1)) return 1;
@@ -433,7 +495,10 @@ function renderKanban(){
     const cards = (byStage[stage]||[]).map(idx => {
       const p = posts[idx];
       return `<div class="kanban-card" draggable="true" ondragstart="kbDragStart(event, ${idx})" onclick="openPost(${idx})">
-        <span class="tag ${p['Formato']}">${p['Formato']}</span>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="tag ${p['Formato']}">${p['Formato']}</span>
+          ${reviewDotsHtml(idx)}
+        </div>
         <div class="kc-seg">${p['Segmento/Página']}</div>
         <div class="kc-date">${fmtDate(p['Data'])}</div>
       </div>`;
@@ -463,26 +528,36 @@ function backToLanding(){
 
 function enterCampaign(id){
   requireLogin(() => {
+    currentCampaignId = id;
+    const c = CAMPAIGNS.find(x => x.id === id);
+    if(c){
+      document.getElementById('appSubtitle').textContent = c.subtitle || (c.dateStart && c.dateEnd ? `${fmtDate(c.dateStart)} a ${fmtDate(c.dateEnd)}` : '');
+    }
     document.getElementById('landingView').style.display = 'none';
     document.getElementById('appView').style.display = 'block';
-    renderAll();
+    setView('list');
   }, { allowGuest: true });
 }
 
 function renderLandingList(){
-  document.getElementById('landingList').innerHTML = CAMPAIGNS.map(c => `
+  const cards = CAMPAIGNS.map(c => `
     <div class="post-card campaign-card" onclick="enterCampaign('${c.id}')">
       <div class="seg" style="font-size:16px;">${c.title}</div>
-      <div class="gancho">${c.subtitle}</div>
+      <div class="gancho">${c.subtitle||''}</div>
       <div class="foot"><span>Campanha ativa</span><span>Abrir →</span></div>
     </div>`).join('');
+  document.getElementById('landingList').innerHTML = cards + `
+    <div class="post-card campaign-card" style="border-style:dashed; text-align:center; cursor:pointer;" onclick="openNewCampaignModal()">
+      <div class="seg" style="font-size:16px;">+ Nova campanha</div>
+      <div class="gancho">Criar uma nova campanha do zero</div>
+    </div>`;
 }
 
 function renderLandingKanban(){
-  const activeStage = computeCampaignStage();
   document.getElementById('landingKanban').innerHTML = CAMPAIGN_STAGES.map((label, i) => {
     const stage = i+1;
-    const cards = (stage === activeStage) ? CAMPAIGNS.map(c => `<div class="kanban-card" onclick="enterCampaign('${c.id}')"><div class="kc-seg">${c.title}</div></div>`).join('') : '';
+    const cardsForStage = CAMPAIGNS.filter(c => computeCampaignStage(c.id) === stage);
+    const cards = cardsForStage.map(c => `<div class="kanban-card" onclick="enterCampaign('${c.id}')"><div class="kc-seg">${c.title}</div></div>`).join('');
     return `<div class="kanban-col"><div class="kanban-col-head"><span>${stage}. ${label}</span></div><div class="kanban-col-body">${cards || '<div class="kc-empty">—</div>'}</div></div>`;
   }).join('');
 }
@@ -491,9 +566,65 @@ function renderLandingCal(){
   document.getElementById('landingCal').innerHTML = CAMPAIGNS.map(c => `
     <div class="post-card campaign-card" onclick="enterCampaign('${c.id}')">
       <div class="seg">${c.title}</div>
-      <div class="gancho">Período: 20/07 a 23/08/2026</div>
+      <div class="gancho">Período: ${c.dateStart?fmtDate(c.dateStart):'?'} a ${c.dateEnd?fmtDate(c.dateEnd):'?'}</div>
       <div class="foot"><span>Ver no calendário →</span></div>
     </div>`).join('');
+}
+
+// ---- Nova campanha ----
+function openNewCampaignModal(){
+  openUtilModal(`
+    <h3>Nova campanha</h3>
+    <input type="text" id="ncTitle" placeholder="Nome da campanha" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:13px;">
+    <input type="text" id="ncSubtitle" placeholder="Subtítulo (opcional)" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:13px;">
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <input type="date" id="ncStart" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:13px;">
+      <input type="date" id="ncEnd" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:13px;">
+    </div>
+    <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);margin-bottom:14px;text-align:left;">
+      <input type="checkbox" id="ncDuplicate"> Duplicar todos os posts da campanha "AVCB 20/07 a 23/08/2026" como ponto de partida
+    </label>
+    <div class="btn-row">
+      <button class="opt-cancel" onclick="closeUtilModal()">Cancelar</button>
+      <button class="opt-primary" onclick="submitNewCampaign()">Criar campanha</button>
+    </div>
+  `);
+}
+
+function submitNewCampaign(){
+  requireLogin(async () => {
+    const title = document.getElementById('ncTitle').value.trim();
+    if(!title){ alert('Digite um nome para a campanha.'); return; }
+    const subtitle = document.getElementById('ncSubtitle').value.trim();
+    const dateStart = document.getElementById('ncStart').value || null;
+    const dateEnd = document.getElementById('ncEnd').value || null;
+    const duplicate = document.getElementById('ncDuplicate').checked;
+
+    const { data: newCamp, error } = await sb.from('campaigns').insert({ title, subtitle, date_start: dateStart, date_end: dateEnd }).select().single();
+    if(error){ console.warn(error); alert('Não foi possível criar a campanha.'); return; }
+
+    if(duplicate){
+      const sourceCampaignId = '00000000-0000-0000-0000-000000000001';
+      const sourcePosts = posts.filter(p => p && p.__campaignId === sourceCampaignId);
+      let nextId = posts.reduce((max, p) => Math.max(max, p.__id), -1) + 1;
+      const rows = sourcePosts.map(p => {
+        const fields = { ...p };
+        delete fields.__id; delete fields.__kanban; delete fields.__campaignId;
+        return { id: nextId++, data: p['Data'], dow: diaSemana(p['Data']), tipo: p['Formato'], titulo: p['Segmento/Página'], fields, kanban_stage: 1, campaign_id: newCamp.id };
+      });
+      if(rows.length){
+        const { error: insErr } = await sb.from('posts').insert(rows);
+        if(insErr) console.warn(insErr);
+      }
+    }
+
+    closeUtilModal();
+    await loadCampaigns();
+    await loadPostsFromSupabase();
+    await loadAllReviewData();
+    renderLandingList();
+    alert('Campanha criada com sucesso!');
+  });
 }
 
 function setLandingView(v){
@@ -514,6 +645,58 @@ const USER_INITIALS = { 'Victor Moraes':'V', 'Pedro Cavani':'P', 'Allan Lauzid':
 const REVIEW_STATES = ['nao_revisado', 'ajustar', 'ok'];
 const REVIEW_LABELS = { nao_revisado:'NR', ajustar:'Aj', ok:'OK' };
 let currentPostReview = {}; // { [fieldKey]: { [userName]: state } }
+
+let allReviewData = {}; // { [postId]: { [fieldKey]: { [userName]: state } } } -- para as bolinhas nos cards
+
+async function loadAllReviewData(){
+  const { data, error } = await sb.from('post_field_review').select('post_id, field_key, user_name, state');
+  if(error){ console.warn(error); return; }
+  allReviewData = {};
+  (data||[]).forEach(row => {
+    if(!allReviewData[row.post_id]) allReviewData[row.post_id] = {};
+    if(!allReviewData[row.post_id][row.field_key]) allReviewData[row.post_id][row.field_key] = {};
+    allReviewData[row.post_id][row.field_key][row.user_name] = row.state;
+  });
+}
+
+async function refreshReviewDataForPost(idx){
+  const { data, error } = await sb.from('post_field_review').select('field_key, user_name, state').eq('post_id', idx);
+  if(error) return;
+  const map = {};
+  (data||[]).forEach(row => {
+    if(!map[row.field_key]) map[row.field_key] = {};
+    map[row.field_key][row.user_name] = row.state;
+  });
+  allReviewData[idx] = map;
+  if(state.view === 'list') renderList();
+  if(state.view === 'kanban') renderKanban();
+}
+
+function reviewCompletion(idx, userName){
+  const p = posts[idx];
+  if(!p) return 0;
+  const keys = fieldKeysForPost(p);
+  if(!keys.length) return 0;
+  const data = allReviewData[idx] || {};
+  let ok = 0;
+  keys.forEach(k => { if(data[k] && data[k][userName] === 'ok') ok++; });
+  if(ok === 0) return 0;
+  if(ok === keys.length) return 1;
+  return 0.5;
+}
+
+function reviewDotSvg(ratio, color){
+  if(ratio <= 0) return '';
+  if(ratio >= 1) return `<svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4.5" fill="${color}"></circle></svg>`;
+  return `<svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="none" stroke="${color}" stroke-width="1.3"></circle><path d="M5,1 A4,4 0 0,1 5,9 Z" fill="${color}"></path></svg>`;
+}
+
+function reviewDotsHtml(idx){
+  const pedro = reviewCompletion(idx, 'Pedro Cavani');
+  const victor = reviewCompletion(idx, 'Victor Moraes');
+  const html = reviewDotSvg(pedro, '#D69A2A') + reviewDotSvg(victor, '#8BC34A');
+  return html ? `<span class="review-dots" title="Amarelo: revisão do Pedro · Verde: revisão do Victor">${html}</span>` : '';
+}
 
 async function loadReviewForPost(idx){
   currentPostReview = {};
@@ -539,6 +722,7 @@ async function upsertReview(idx, key, userName, newState){
     );
     await sb.from('audit_log').insert({ post_id: idx, user_id: currentUser.id, user_name: currentUser.name, action_type: 'review_change', field_key: key, to_value: newState });
   }catch(e){ console.warn(e); }
+  refreshReviewDataForPost(idx);
 }
 
 async function setAllReviewsOk(idx){
@@ -556,6 +740,7 @@ async function setAllReviewsOk(idx){
   try{
     await sb.from('post_field_review').upsert(rows, { onConflict: 'post_id,field_key,user_name' });
   }catch(e){ console.warn(e); }
+  refreshReviewDataForPost(idx);
 }
 
 async function setReviewState(idx, key, userName, newState){
@@ -604,15 +789,47 @@ function tryRestoreSession(){
     const raw = sessionStorage.getItem(CURRENT_USER_KEY);
     if(raw) currentUser = JSON.parse(raw);
   }catch(e){}
+  if(isSessionExpired()){
+    currentUser = null;
+    try{ sessionStorage.removeItem(CURRENT_USER_KEY); }catch(e){}
+  }
 }
 
 function updateUserBadge(){
-  const el = document.getElementById('currentUserBadge');
+  const el = document.getElementById('sbPerfilLabel');
   if(!el) return;
-  if(currentUser) el.textContent = '👤 ' + currentUser.name;
-  else if(isGuest) el.textContent = '👁 Visitante (somente leitura)';
-  else el.textContent = '';
+  if(currentUser) el.textContent = currentUser.name + ' (sair)';
+  else if(isGuest) el.textContent = 'Visitante (somente leitura)';
+  else el.textContent = 'Perfil';
 }
+
+// ---- Sidebar retrátil ----
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+function toggleFiltersPanel(){
+  document.getElementById('filtersPanel').classList.toggle('open');
+  closeSidebar();
+}
+
+// ---- Sessão expira em 1h ----
+const SESSION_TTL_MS = 60 * 60 * 1000;
+function isSessionExpired(){
+  if(!currentUser || !currentUser.loginAt) return false;
+  return (Date.now() - currentUser.loginAt) > SESSION_TTL_MS;
+}
+setInterval(() => {
+  if(isSessionExpired()){
+    currentUser = null;
+    try{ sessionStorage.removeItem(CURRENT_USER_KEY); }catch(e){}
+    updateUserBadge();
+  }
+}, 60 * 1000);
 
 // opts.allowGuest = true permite mostrar o link "Acessar sem fazer login"
 // (usado só para entrar na campanha; nunca para liberar uma edição)
@@ -660,7 +877,7 @@ async function submitLoginPin(){
     document.getElementById('loginError').style.display = 'block';
     return;
   }
-  currentUser = { id: data, name: loginSelectedName };
+  currentUser = { id: data, name: loginSelectedName, loginAt: Date.now() };
   try{ sessionStorage.setItem(CURRENT_USER_KEY, JSON.stringify(currentUser)); }catch(e){}
   document.getElementById('loginBackdrop').classList.remove('active');
   updateUserBadge();
@@ -696,6 +913,15 @@ Object.entries(pubLabel).sort((a,b)=>a[1].localeCompare(b[1])).forEach(([full,le
   pubSelect.appendChild(opt);
 });
 
+// populate kanban stage filter dropdown
+const kanbanFilterSelect = document.getElementById('kanbanFilter');
+KANBAN_STAGES.forEach((label, i) => {
+  const opt = document.createElement('option');
+  opt.value = String(i+1);
+  opt.textContent = `${i+1}. ${label}`;
+  kanbanFilterSelect.appendChild(opt);
+});
+
 // legend
 const legendGrid = document.getElementById('legendGrid');
 Object.entries(pubLabel).sort((a,b)=>a[1].localeCompare(b[1])).forEach(([full,letter])=>{
@@ -727,8 +953,11 @@ function setView(v){
 function filteredPosts(){
   const q = document.getElementById('searchBox').value.trim().toLowerCase();
   return posts.filter(p => {
+    if(!p) return false;
+    if(p.__campaignId !== currentCampaignId) return false;
     if(state.formatos.size && !state.formatos.has(p['Formato'])) return false;
     if(state.pub && pubLabel[p['Público-alvo']] !== state.pub) return false;
+    if(state.kanbanStage && (p.__kanban||2) !== state.kanbanStage) return false;
     if(q){
       const hay = (p['Segmento/Página']+' '+p['Gancho']+' '+p['Dor/Intenção']).toLowerCase();
       if(!hay.includes(q)) return false;
@@ -739,6 +968,8 @@ function filteredPosts(){
 
 function renderAll(){
   state.pub = document.getElementById('pubFilter').value;
+  const kf = document.getElementById('kanbanFilter').value;
+  state.kanbanStage = kf ? parseInt(kf, 10) : null;
   if(state.view === 'list') renderList();
   else if(state.view === 'kanban') renderKanban();
   else renderCalendar();
@@ -768,8 +999,18 @@ function renderList(){
 function postCardHtml(p){
   const letter = pubLabel[p['Público-alvo']];
   const idx = posts.indexOf(p);
+  const stage = p.__kanban || 2;
   return `<div class="post-card" onclick="openPost(${idx})">
-    <div class="row1"><span class="tag ${p['Formato']}">${p['Formato']}</span><span class="pub-badge" title="${p['Público-alvo']}">${letter}</span></div>
+    <div class="row1">
+      <span class="tag ${p['Formato']}">${p['Formato']}</span>
+      <div style="display:flex; align-items:center; gap:8px;">
+        ${reviewDotsHtml(idx)}
+        <div class="list-badges">
+          <span class="pub-badge" title="${KANBAN_STAGES[stage-1]}">${stage}</span>
+          <span class="pub-badge-outline" title="${p['Público-alvo']}">${letter}</span>
+        </div>
+      </div>
+    </div>
     <div class="seg">${p['Segmento/Página']}</div>
     <div class="gancho">${p['Gancho']}</div>
     <div class="foot"><span>${p['Semana']}</span><span>Ver detalhes →</span></div>
@@ -844,8 +1085,29 @@ function field(label, value, key){
   // para não perder edições anteriores.
   const displayValue = (editMode && sug) ? sug.text : value;
   const sugHtml = (sug && !editMode) ? `<div class="suggestion"><div class="sug-lbl">Sugestão de Edição de ${escapeHtml(sug.editor||'—')}</div><div class="sug-txt">${escapeHtml(sug.text)}</div><button type="button" class="sug-hist-btn" onclick="showFieldHistory(${idx}, '${key}')">Ver versão original</button></div>` : '';
-  const reviewHtml = key ? reviewSwitchHtml(idx, key) : '';
-  return `<div class="field">${reviewHtml}<div class="lbl">${label}</div><div class="val"${editableAttr}>${displayValue}</div>${sugHtml}</div>`;
+  return `<div class="field"><div class="lbl">${label}</div><div class="val"${editableAttr}>${displayValue}</div>${sugHtml}</div>`;
+}
+
+function stageRatchetHtml(idx){
+  const p = posts[idx];
+  const stage = p.__kanban || 2;
+  return `<div class="stage-ratchet-wrap">
+    <div class="stage-ratchet">
+      <button type="button" class="sr-arrow" ${stage<=1?'disabled':''} onclick="moveToStage(${idx}, ${stage-1})" title="Etapa anterior">‹</button>
+      <span class="sr-label">${KANBAN_STAGES[stage-1]}</span>
+      <button type="button" class="sr-arrow" ${stage>=10?'disabled':''} onclick="moveToStage(${idx}, ${stage+1})" title="Próxima etapa">›</button>
+    </div>
+    <select class="stage-select-mini" onchange="if(this.value)moveToStage(${idx}, parseInt(this.value,10)); this.value='';">
+      <option value="">Mudar Kanban</option>
+      ${KANBAN_STAGES.map((lbl,i)=>`<option value="${i+1}">${lbl}</option>`).join('')}
+    </select>
+  </div>`;
+}
+
+function editActionButtonsHtml(){
+  return editMode
+    ? `<button class="btn-save" onclick="saveEdits()">Salvar</button><button class="btn-cancel" onclick="cancelEdits()">Cancelar</button>`
+    : `<button class="btn-suggest" onclick="enterEditMode()">✎ Sugerir edições</button>`;
 }
 
 async function showFieldHistory(idx, key){
@@ -904,6 +1166,7 @@ function renderPostModal(){
 
   const modal = document.getElementById('modalBody');
   modal.innerHTML = `<button class="close" onclick="closeModal()">✕</button>
+    ${stageRatchetHtml(idx)}
     <div class="meta-row">
       <span class="tag ${p['Formato']}">${p['Formato']}</span>
       <span class="pub-badge">${letter}</span>
@@ -911,19 +1174,7 @@ function renderPostModal(){
     </div>
     <h2>${p['Segmento/Página']}</h2>
     <a class="url-link" href="${p['URL de apoio']}" target="_blank" rel="noopener">${p['URL de apoio']}</a>
-    <div class="edit-toolbar">
-      ${editMode
-        ? `<button class="btn-save" onclick="saveEdits()">Salvar</button><button class="btn-cancel" onclick="cancelEdits()">Cancelar</button>`
-        : `<button class="btn-suggest" onclick="enterEditMode()">✎ Sugerir edições</button>`}
-      <span class="stage-btns">
-        <button type="button" class="stage-btn current">${p.__kanban||2}. ${KANBAN_STAGES[(p.__kanban||2)-1]}</button>
-        ${(p.__kanban||2) < 10 ? `<button type="button" class="stage-btn next" onclick="moveToNextStage(${idx})">→ ${KANBAN_STAGES[(p.__kanban||2)]}</button>` : ''}
-        <select class="stage-select" onchange="if(this.value)moveToStage(${idx}, parseInt(this.value,10)); this.value='';">
-          <option value="">Mudar etapa…</option>
-          ${KANBAN_STAGES.map((lbl,i)=>`<option value="${i+1}">${i+1}. ${lbl}</option>`).join('')}
-        </select>
-      </span>
-    </div>
+    <div class="edit-toolbar">${editActionButtonsHtml()}</div>
     ${field('Público-alvo (Público '+letter+')', p['Público-alvo'], 'pub')}
     ${field('Dor / Intenção', p['Dor/Intenção'], 'dor')}
     ${field('Gancho', p['Gancho'], 'gancho')}
@@ -936,6 +1187,7 @@ function renderPostModal(){
     ${field('Tom obrigatório', p['Tom obrigatório'], 'tom')}
     ${field('Status', p['Status'], 'status')}
     ${extra}
+    <div class="edit-toolbar" style="margin-top:8px;">${editActionButtonsHtml()}</div>
   `;
 }
 
@@ -1226,7 +1478,9 @@ function parseImportedText(text){
 (async function init(){
   tryRestoreSession();
   updateUserBadge();
+  await loadCampaigns();
   await loadPostsFromSupabase();
+  await loadAllReviewData();
   renderLandingList(); // primeira visão: landing page
 })();
 </script>
