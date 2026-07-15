@@ -352,6 +352,7 @@
       <label class="visually-hidden" for="kanbanFilter">Filtrar por etapa do Kanban</label>
       <select id="kanbanFilter" name="kanbanFilter" onchange="renderAll()"><option value="">Todas as etapas do Kanban</option></select>
       <button type="button" class="legend-btn" onclick="toggleLegend()">Legenda de públicos ▾</button>
+      <button type="button" class="legend-btn" id="btnAddPost" onclick="openNewPostModal()" title="Somente Allan pode criar posts">+ Adicionar post</button>
     </div>
     <div class="legend-panel" id="legendPanel">
       <b>Legenda de Público-alvo</b>
@@ -362,6 +363,9 @@
   <div id="listView"></div>
 
   <div id="kanbanView">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+      <button type="button" class="legend-btn" id="btnAddStage" onclick="openNewStageModal()" title="Somente Allan pode criar posições">+ Criar posição</button>
+    </div>
     <div class="kanban-board" id="kanbanBoard"></div>
   </div>
 
@@ -503,7 +507,7 @@ async function moveToStage(idx, newStage){
 function moveToNextStage(idx){
   const p = posts[idx];
   if(!p) return;
-  const next = Math.min(10, (p.__kanban || 2) + 1);
+  const next = Math.min(KANBAN_STAGES.length, (p.__kanban || 2) + 1);
   moveToStage(idx, next);
 }
 
@@ -511,7 +515,7 @@ function renderKanban(){
   const container = document.getElementById('kanbanBoard');
   const list = filteredPosts();
   const byStage = {};
-  for(let s=1;s<=10;s++) byStage[s] = [];
+  for(let s=1;s<=KANBAN_STAGES.length;s++) byStage[s] = [];
   list.forEach(p => {
     const idx = posts.indexOf(p);
     const stage = p.__kanban || 2;
@@ -616,10 +620,11 @@ function renderLandingList(){
       <div class="foot"><span>${pct}% publicado</span><span>Abrir →</span></div>
     </div>`;
   }).join('');
+  const canCreateCampaign = isAllan();
   document.getElementById('landingList').innerHTML = cards + `
-    <div class="post-card campaign-card" style="border-style:dashed; text-align:center; cursor:pointer;" onclick="openNewCampaignModal()">
+    <div class="post-card campaign-card" style="border-style:dashed; text-align:center; ${canCreateCampaign ? 'cursor:pointer;' : 'cursor:not-allowed;opacity:.5;'}" ${canCreateCampaign ? 'onclick="openNewCampaignModal()"' : 'title="Somente Allan pode criar campanhas"'}>
       <div class="seg" style="font-size:16px;">+ Nova campanha</div>
-      <div class="gancho">Criar uma nova campanha do zero</div>
+      <div class="gancho">${canCreateCampaign ? 'Criar uma nova campanha do zero' : 'Somente Allan pode criar campanhas'}</div>
     </div>`;
 }
 
@@ -666,6 +671,13 @@ function renderLandingCal(){
 
 // ---- Nova campanha ----
 function openNewCampaignModal(){
+  requireLogin(() => {
+    if(!isAllan()){ alert('Somente Allan pode criar novas campanhas.'); return; }
+    openNewCampaignModalInner();
+  });
+}
+
+function openNewCampaignModalInner(){
   openUtilModal(`
     <h3>Nova campanha</h3>
     <input type="text" id="ncTitle" placeholder="Nome da campanha" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:13px;">
@@ -687,6 +699,7 @@ function openNewCampaignModal(){
 
 function submitNewCampaign(){
   requireLogin(async () => {
+    if(!isAllan()){ alert('Somente Allan pode criar novas campanhas.'); return; }
     const title = document.getElementById('ncTitle').value.trim();
     if(!title){ document.getElementById('ncError').style.display = 'block'; document.getElementById('ncTitle').focus(); return; }
     const subtitle = document.getElementById('ncSubtitle').value.trim();
@@ -718,6 +731,62 @@ function submitNewCampaign(){
     await loadAllReviewData();
     renderLandingList();
     alert('Campanha criada com sucesso!');
+  });
+}
+
+// ---- Novo post/card (somente Allan, em qualquer campanha) ----
+function openNewPostModal(){
+  requireLogin(() => {
+    if(!isAllan()){ alert('Somente Allan pode criar posts.'); return; }
+    if(!currentCampaignId){ alert('Abra uma campanha primeiro.'); return; }
+    const stageOptions = KANBAN_STAGES.map((lbl,i)=>`<option value="${i+1}">${i+1}. ${lbl}</option>`).join('');
+    openUtilModal(`
+      <h3>Adicionar post</h3>
+      <input type="date" id="npData" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:13px;">
+      <input type="text" id="npTitulo" placeholder="Título (ex.: segmento/página)" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:13px;">
+      <input type="text" id="npSubtitulo" placeholder="Subtítulo (texto ou link https://...)" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:13px;">
+      <textarea id="npTopicos" placeholder="Tópicos internos (um por linha)" style="width:100%;min-height:90px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:13px;font-family:inherit;"></textarea>
+      <select id="npFormato" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:13px;">
+        <option value="Stories">Stories</option><option value="Feed">Feed</option><option value="Reels">Reels</option>
+      </select>
+      <select id="npKanban" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:13px;">${stageOptions}</select>
+      <div class="login-error" id="npError" aria-live="polite" style="text-align:left;">Preencha ao menos a data e o título.</div>
+      <div class="btn-row">
+        <button class="opt-cancel" onclick="closeUtilModal()">Cancelar</button>
+        <button class="opt-primary" onclick="submitNewPost()">Criar post</button>
+      </div>
+    `);
+  });
+}
+
+function submitNewPost(){
+  requireLogin(async () => {
+    if(!isAllan()){ alert('Somente Allan pode criar posts.'); return; }
+    const data = document.getElementById('npData').value;
+    const titulo = document.getElementById('npTitulo').value.trim();
+    if(!data || !titulo){ document.getElementById('npError').style.display = 'block'; return; }
+    const subtitulo = document.getElementById('npSubtitulo').value.trim();
+    const topicos = document.getElementById('npTopicos').value.trim();
+    const formato = document.getElementById('npFormato').value;
+    const kanban = parseInt(document.getElementById('npKanban').value, 10) || 1;
+    const isLink = /^https?:\/\//i.test(subtitulo);
+
+    const nextId = posts.reduce((max, p) => p ? Math.max(max, p.__id) : max, -1) + 1;
+    const fields = {
+      'Data': data, 'Semana': diaSemana(data), 'Formato': formato, 'Segmento/Página': titulo,
+      'URL de apoio': isLink ? subtitulo : '', 'Público-alvo': '', 'Dor/Intenção': '',
+      'Gancho': isLink ? '' : subtitulo, 'Objetivo do post': '', 'Estrutura': topicos,
+      'Texto da arte': '', 'Legenda/copy': '', 'CTA': '', 'Prompt generativo de imagem': '',
+      'Tom obrigatório': '', 'Status': ''
+    };
+    const row = { id: nextId, data, dow: diaSemana(data), tipo: formato, titulo, fields, kanban_stage: kanban, campaign_id: currentCampaignId };
+    const { error } = await sb.from('posts').insert(row);
+    if(error){ console.warn(error); alert('Não foi possível criar o post.'); return; }
+    closeUtilModal();
+    await loadPostsFromSupabase();
+    await loadAllReviewData();
+    renderAll();
+    showToast('Post criado com sucesso.');
   });
 }
 
@@ -862,10 +931,27 @@ function tryRestoreSession(){
 
 function updateUserBadge(){
   const el = document.getElementById('sbPerfilLabel');
-  if(!el) return;
-  if(currentUser) el.textContent = currentUser.name + ' (sair)';
-  else if(isGuest) el.textContent = 'Visitante (somente leitura)';
-  else el.textContent = 'Perfil';
+  if(el){
+    if(currentUser) el.textContent = currentUser.name + ' (sair)';
+    else if(isGuest) el.textContent = 'Visitante (somente leitura)';
+    else el.textContent = 'Perfil';
+  }
+  updatePermissionUI();
+}
+
+// ---- Permissões: só Allan pode criar campanhas, posts e posições do Kanban ----
+function isAllan(){ return !!(currentUser && currentUser.name === 'Allan Lauzid'); }
+
+function updatePermissionUI(){
+  const allan = isAllan();
+  ['btnAddPost','btnAddStage'].forEach(id => {
+    const btn = document.getElementById(id);
+    if(!btn) return;
+    btn.disabled = !allan;
+    btn.style.opacity = allan ? '1' : '.5';
+    btn.style.cursor = allan ? 'pointer' : 'not-allowed';
+    btn.title = allan ? '' : (id === 'btnAddPost' ? 'Somente Allan pode criar posts' : 'Somente Allan pode criar posições');
+  });
 }
 
 // ---- Sidebar retrátil (clique fixa aberto; no desktop, passar o mouse na borda esquerda também abre) ----
@@ -1034,14 +1120,59 @@ Object.entries(pubLabel).sort((a,b)=>a[1].localeCompare(b[1])).forEach(([full,le
   pubSelect.appendChild(opt);
 });
 
-// populate kanban stage filter dropdown
-const kanbanFilterSelect = document.getElementById('kanbanFilter');
-KANBAN_STAGES.forEach((label, i) => {
-  const opt = document.createElement('option');
-  opt.value = String(i+1);
-  opt.textContent = `${i+1}. ${label}`;
-  kanbanFilterSelect.appendChild(opt);
-});
+// populate kanban stage filter dropdown (chamado de novo depois de carregar posições customizadas)
+function populateKanbanFilter(){
+  const kanbanFilterSelect = document.getElementById('kanbanFilter');
+  const prev = kanbanFilterSelect.value;
+  kanbanFilterSelect.innerHTML = '<option value="">Todas as etapas do Kanban</option>';
+  KANBAN_STAGES.forEach((label, i) => {
+    const opt = document.createElement('option');
+    opt.value = String(i+1);
+    opt.textContent = `${i+1}. ${label}`;
+    kanbanFilterSelect.appendChild(opt);
+  });
+  kanbanFilterSelect.value = prev;
+}
+populateKanbanFilter();
+
+// ---- Posições customizadas do Kanban (somente Allan pode criar) ----
+async function loadKanbanStages(){
+  try{
+    const { data, error } = await sb.from('kanban_stages').select('*').order('position', { ascending: true });
+    if(error){ console.warn(error); return; }
+    (data||[]).forEach(row => { if(!KANBAN_STAGES.includes(row.label)) KANBAN_STAGES.push(row.label); });
+    populateKanbanFilter();
+  }catch(e){ console.warn(e); }
+}
+
+function openNewStageModal(){
+  requireLogin(() => {
+    if(!isAllan()){ alert('Somente Allan pode criar posições do Kanban.'); return; }
+    openUtilModal(`
+      <h3>Criar posição do Kanban</h3>
+      <input type="text" id="nsLabel" placeholder="Nome da nova posição" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:13px;">
+      <div class="login-error" id="nsError" aria-live="polite" style="text-align:left;">Digite um nome para a posição.</div>
+      <div class="btn-row">
+        <button class="opt-cancel" onclick="closeUtilModal()">Cancelar</button>
+        <button class="opt-primary" onclick="submitNewStage()">Criar posição</button>
+      </div>
+    `);
+  });
+}
+
+async function submitNewStage(){
+  if(!isAllan()){ alert('Somente Allan pode criar posições do Kanban.'); return; }
+  const label = document.getElementById('nsLabel').value.trim();
+  if(!label){ document.getElementById('nsError').style.display = 'block'; return; }
+  const position = KANBAN_STAGES.length + 1;
+  const { error } = await sb.from('kanban_stages').insert({ position, label });
+  if(error){ console.warn(error); alert('Não foi possível criar a posição. Verifique se a tabela kanban_stages já foi criada no Supabase.'); return; }
+  KANBAN_STAGES.push(label);
+  populateKanbanFilter();
+  closeUtilModal();
+  if(state.view === 'kanban') renderKanban();
+  showToast('Posição criada com sucesso.');
+}
 
 // legend
 const legendGrid = document.getElementById('legendGrid');
@@ -1644,6 +1775,8 @@ function setupScrollLock(){
   await loadCampaigns();
   await loadPostsFromSupabase();
   await loadAllReviewData();
+  await loadKanbanStages();
+  updatePermissionUI();
   renderLandingList(); // primeira visão: landing page
 })();
 </script>
