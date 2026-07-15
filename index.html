@@ -8,12 +8,19 @@
 <style>
   :root{
     --navy:#07295F; --navy-deep:#041F4A; --gold:#D69A2A; --gold-light:#F1B13B;
-    --bg:#F4F6F9; --card:#FFFFFF; --border:#E2E7EE; --text:#1E2A38; --muted:#66758A;
+    --bg:#F4F6F9; --card:#FFFFFF; --border:#E2E7EE; --text:#1E2A38; --muted:#66758A; --muted-text:#4B5768;
     --stories:#8E5BD9; --feed:#1877C9; --reels:#D9455B;
+    /* escala de z-index */
+    --z-header:20; --z-hamburger:60; --z-sidebar-overlay:55; --z-sidebar:58; --z-modal:90;
   }
   *{box-sizing:border-box;}
   body{margin:0; background:var(--bg); color:var(--text); font-family:'Segoe UI',Arial,sans-serif;}
-  header{background:linear-gradient(135deg,var(--navy),var(--navy-deep)); color:#fff; padding:20px 24px; position:sticky; top:0; z-index:200; box-shadow:0 4px 14px rgba(0,0,0,.18);}
+  .visually-hidden{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;}
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important;}
+  }
+  @media (min-width:761px){ body{zoom:1.25;} }
+  header{background:linear-gradient(135deg,var(--navy),var(--navy-deep)); color:#fff; padding:20px 24px; position:sticky; top:0; z-index:var(--z-header); box-shadow:0 4px 14px rgba(0,0,0,.18);}
   header h1{margin:0 0 4px; font-size:20px;}
   header p{margin:0; font-size:13px; color:#c9d3e0;}
   .topbar{max-width:1200px; margin:0 auto; display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between;}
@@ -42,7 +49,7 @@
   .session-item:hover{border-color:var(--gold); background:#fffaf0;}
   .session-item .s-name{font-weight:700; font-size:13px; color:var(--navy);}
   .session-item .s-time{font-size:11.5px; color:var(--muted);}
-  .util-empty{font-size:13px; color:var(--muted); padding:10px 0;}
+  .util-empty{font-size:13px; color:var(--muted-text); padding:10px 0;}
   .view-toggle{display:flex; gap:6px; background:rgba(255,255,255,.12); padding:4px; border-radius:10px;}
   .view-toggle button{border:none; background:transparent; color:#fff; padding:8px 16px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;}
   .view-toggle button.active{background:var(--gold); color:var(--navy-deep);}
@@ -75,8 +82,8 @@
   .post-card{background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px 16px; cursor:pointer; transition:.15s; display:flex; flex-direction:column; gap:8px;}
   .post-card:hover{border-color:var(--gold); box-shadow:0 4px 14px rgba(7,41,95,.10); transform:translateY(-2px);}
   .post-card .row1{display:flex; justify-content:space-between; align-items:center;}
-  .post-card .seg{font-size:14px; font-weight:700; color:var(--navy); line-height:1.3;}
-  .post-card .gancho{font-size:12.5px; color:var(--muted); line-height:1.5;}
+  .post-card .seg{font-size:14px; font-weight:700; color:var(--navy); line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+  .post-card .gancho{font-size:12.5px; color:var(--muted-text); line-height:1.5; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;}
   .post-card .foot{display:flex; justify-content:space-between; align-items:center; margin-top:auto; font-size:11px; color:var(--muted);}
 
   /* CALENDAR VIEW */
@@ -105,10 +112,11 @@
   .agenda-day .items{display:flex; flex-wrap:wrap; gap:6px;}
 
   /* MODAL */
-  .backdrop{position:fixed; inset:0; background:rgba(4,20,50,.55); display:none; align-items:flex-start; justify-content:center; z-index:100; padding:26px 14px; overflow-y:auto;}
+  .backdrop{position:fixed; inset:0; background:rgba(4,20,50,.55); display:none; align-items:flex-start; justify-content:center; z-index:100; padding:26px 14px; overflow:hidden;}
   .backdrop.active{display:flex;}
-  .modal{background:#fff; max-width:760px; width:100%; border-radius:14px; padding:26px 26px 30px; position:relative; margin-top:10px;}
-  .modal .close{position:absolute; top:16px; right:16px; border:none; background:#eef1f5; width:32px; height:32px; border-radius:50%; font-size:15px; cursor:pointer; color:var(--muted);}
+  .modal{background:#fff; max-width:760px; width:100%; border-radius:14px; padding:26px 26px 30px; position:relative; margin-top:10px; max-height:calc(100vh - 52px); overflow-y:auto;}
+  .modal-top-row{position:sticky; top:-26px; z-index:5; background:#fff; margin:-26px -26px 16px; padding:14px 56px 12px 26px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; border-bottom:1px solid var(--border);}
+  .modal .close{position:absolute; top:16px; right:16px; z-index:6; border:none; background:#eef1f5; width:32px; height:32px; border-radius:50%; font-size:15px; cursor:pointer; color:var(--muted);}
   .modal h2{font-size:19px; color:var(--navy); margin:6px 0 4px; padding-right:36px;}
   .modal .meta-row{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:16px;}
   .modal .url-link{display:inline-block; margin-bottom:16px; font-size:12.5px; word-break:break-all; color:var(--feed); text-decoration:none; background:#eef4fc; padding:8px 12px; border-radius:8px;}
@@ -116,10 +124,10 @@
   .field{margin-bottom:14px;}
   .field .lbl{font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--gold-light); background:#fbf3e2; display:inline-block; padding:2px 8px; border-radius:6px; margin-bottom:5px;}
   .field .val{font-size:13.5px; line-height:1.6; color:var(--text); white-space:pre-line;}
+  .field .val.has-suggestion{padding:8px 10px; background:#fdeeee; border-left:3px solid #c0392b; border-radius:6px; color:#c0392b;}
   .field .val[contenteditable="true"]{outline:2px dashed var(--gold); outline-offset:4px; border-radius:6px; padding:4px 6px; background:#fffdf5; cursor:text;}
-  .field .suggestion{margin-top:8px; padding:8px 10px; background:#fdeeee; border-left:3px solid #c0392b; border-radius:6px;}
-  .field .suggestion .sug-lbl{font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:#c0392b; margin-bottom:3px;}
-  .field .suggestion .sug-txt{font-size:13px; line-height:1.6; color:#c0392b; white-space:pre-line;}
+  .field .suggestion{margin-top:6px; display:flex; align-items:center; justify-content:space-between; gap:10px;}
+  .field .suggestion .sug-lbl{font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:#c0392b;}
   .edit-toolbar{display:flex; gap:10px; margin:4px 0 18px;}
   .edit-toolbar button{border:none; padding:8px 16px; border-radius:8px; font-size:12.5px; font-weight:700; cursor:pointer;}
   .btn-suggest{background:#fbf3e2; color:#8a6300; border:1px solid var(--gold-light) !important;}
@@ -167,8 +175,7 @@
   .login-error{color:var(--reels); font-size:12px; margin:-6px 0 12px; display:none;}
 
   /* SUGESTÃO DE EDIÇÃO */
-  .suggestion{position:relative; padding-right:110px;}
-  .sug-hist-btn{position:absolute; right:0; bottom:0; border:1px solid var(--border); background:#fff; color:var(--muted); font-size:10.5px; padding:4px 8px; border-radius:14px; cursor:pointer;}
+  .sug-hist-btn{flex-shrink:0; border:1px solid var(--border); background:#fff; color:var(--muted); font-size:10.5px; padding:4px 8px; border-radius:14px; cursor:pointer;}
   .sug-hist-btn:hover{border-color:var(--gold); color:#8a6300;}
   .hist-item{border:1px solid var(--border); border-radius:9px; padding:10px 12px; margin-bottom:8px; text-align:left;}
   .hist-meta{font-size:11px; font-weight:700; color:var(--navy); margin-bottom:4px;}
@@ -184,8 +191,9 @@
   .kanban-col-body{display:flex; flex-direction:column; gap:8px; min-height:40px;}
   .kanban-card{background:#fff; border:1px solid var(--border); border-radius:10px; padding:9px 10px; cursor:grab; font-size:12px;}
   .kanban-card:hover{border-color:var(--gold);}
-  .kc-seg{font-weight:700; color:var(--navy); margin-top:4px; font-size:12.5px;}
-  .kc-date{color:var(--muted); font-size:11px; margin-top:2px;}
+  .kc-seg{font-weight:700; color:var(--navy); margin-top:4px; font-size:12.5px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+  .kanban-col.is-empty{opacity:.55; min-width:130px; flex:0 0 130px;}
+  .kc-date{color:var(--muted-text); font-size:11px; margin-top:2px;}
   .kc-empty{color:var(--muted); font-size:11px; text-align:center; padding:8px 0;}
 
   /* Botões / dropdown de etapa no modal do post */
@@ -196,18 +204,7 @@
   .stage-btn.next:hover{background:var(--navy-deep);}
   .stage-select{border:1px solid var(--border); border-radius:8px; font-size:11.5px; padding:8px 8px; color:var(--muted);}
 
-  /* Switch de revisão (3 posições, por usuário) */
   .field{position:relative;}
-  .review-row{position:absolute; top:0; right:0; display:flex; gap:6px; flex-wrap:wrap;}
-  .review-switch{display:flex; align-items:center; gap:2px; background:#f4f6f9; border-radius:8px; padding:2px 4px;}
-  .review-switch.mine{background:#fffaf0; border:1px solid var(--gold-light);}
-  .rs-name{font-size:9.5px; font-weight:800; color:var(--muted); padding:0 3px;}
-  .review-switch.mine .rs-name{color:#8a6300;}
-  .rs-opt{border:none; background:transparent; font-size:9px; font-weight:700; padding:3px 5px; border-radius:5px; cursor:pointer; color:#9aa6b5;}
-  .review-switch.readonly .rs-opt{cursor:default;}
-  .rs-opt.active.state-nao_revisado{background:#dde3ea; color:var(--muted);}
-  .rs-opt.active.state-ajustar{background:var(--reels); color:#fff;}
-  .rs-opt.active.state-ok{background:#1e7a44; color:#fff;}
 
   /* LANDING PAGE */
   #landingView{max-width:1000px; margin:0 auto; padding:48px 16px 60px;}
@@ -216,6 +213,11 @@
   .landing-toggle button{color:var(--navy);}
   .landing-toggle button.active{background:var(--gold); color:#fff;}
   .campaign-card{max-width:420px; margin:0 auto;}
+  .campaign-progress{height:6px; border-radius:4px; background:#eef1f5; overflow:hidden; margin:2px 0 4px;}
+  .campaign-progress-bar{height:100%; border-radius:4px; transition:width .3s ease;}
+  .kanban-card.campaign-bar{border-width:1px; border-style:solid;}
+  .landing-cal-bars{display:flex; flex-direction:column; gap:2px; margin-top:3px;}
+  .landing-cal-bar{height:7px; border-radius:5px;}
 
   /* Cabeçalho centralizado (landing e campanha) */
   .topbar-centered{max-width:1200px; margin:0 auto; text-align:center;}
@@ -225,11 +227,13 @@
   .landing-subtitle{text-align:center; color:var(--muted); font-size:13px; margin:-14px 0 24px;}
 
   /* Sidebar retrátil (desktop) */
-  .hamburger-btn{position:fixed; top:14px; right:14px; z-index:700; border:none; background:var(--navy); color:#fff; width:38px; height:38px; border-radius:9px; font-size:17px; cursor:pointer; display:block;}
+  .hamburger-btn{position:fixed; top:14px; right:14px; z-index:var(--z-hamburger); border:none; background:var(--navy); color:#fff; width:38px; height:38px; border-radius:9px; font-size:17px; cursor:pointer; display:block;}
   @media (min-width:761px){ .hamburger-btn{left:14px; right:auto;} }
-  .sidebar-overlay{display:none; position:fixed; inset:0; background:rgba(4,20,50,.35); z-index:650;}
-  .sidebar-overlay.open{display:block;}
-  .sidebar{position:fixed; top:0; left:0; bottom:0; width:230px; background:#fff; box-shadow:2px 0 18px rgba(4,20,50,.18); z-index:680; padding:64px 14px 14px; display:flex; flex-direction:column; gap:8px; transform:translateX(-100%); transition:transform .2s ease;}
+  .sidebar-overlay{position:fixed; inset:0; background:rgba(4,20,50,.35); z-index:var(--z-sidebar-overlay); opacity:0; visibility:hidden; transition:opacity .22s ease, visibility 0s linear .22s;}
+  .sidebar-overlay.open{opacity:1; visibility:visible; transition:opacity .22s ease, visibility 0s linear 0s;}
+  .sidebar{position:fixed; top:0; left:0; bottom:0; width:230px; background:#fff; box-shadow:2px 0 18px rgba(4,20,50,.18); z-index:var(--z-sidebar); padding:64px 14px 14px; display:flex; flex-direction:column; gap:8px; transform:translateX(-100%); transition:transform .28s cubic-bezier(.4,0,.2,1);}
+  .sidebar-hotzone{display:none; position:fixed; top:0; left:0; bottom:0; width:14px; z-index:var(--z-sidebar-overlay);}
+  @media (min-width:761px){ .sidebar-hotzone{display:block;} }
   .sidebar.open{transform:translateX(0);}
   .sidebar-head{font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:4px;}
   .sidebar-btn{display:flex; align-items:center; gap:8px; width:100%; text-align:left; border:1px solid var(--border); background:#fff; color:var(--navy); font-size:13px; font-weight:600; padding:10px 12px; border-radius:9px; cursor:pointer;}
@@ -243,31 +247,46 @@
   .filters-panel.open{display:block;}
 
   /* Correção: modal do post precisa cobrir o cabeçalho */
-  .backdrop{z-index:900;}
-  .util-backdrop{z-index:900;}
+  .backdrop{z-index:var(--z-modal);}
+  .util-backdrop{z-index:var(--z-modal);}
 
   /* Catraca de etapa do Kanban dentro do modal */
-  .stage-ratchet-wrap{display:flex; justify-content:flex-end; align-items:center; gap:6px; margin:-4px 0 10px;}
+  .stage-ratchet-wrap{display:flex; align-items:center; gap:6px;}
   .stage-ratchet{display:flex; align-items:center; gap:4px; background:#f4f6f9; border-radius:20px; padding:3px 4px;}
-  .sr-arrow{border:none; background:#fff; width:22px; height:22px; border-radius:50%; font-size:11px; color:var(--navy); cursor:pointer; box-shadow:0 1px 2px rgba(4,20,50,.12);}
+  .sr-arrow{border:none; background:#fff; width:34px; height:34px; border-radius:50%; font-size:14px; color:var(--navy); cursor:pointer; box-shadow:0 1px 2px rgba(4,20,50,.12);}
   .sr-arrow:disabled{opacity:.35; cursor:default;}
   .sr-label{font-size:10.5px; font-weight:700; color:var(--navy); padding:0 6px; white-space:nowrap;}
-  .stage-select-mini{border:1px solid var(--border); background:#fff; border-radius:20px; font-size:11px; color:var(--muted); padding:5px 8px; max-width:110px;}
+  .kanban-dropdown-wrap{position:relative;}
+  .kanban-dropdown-btn{border:1px solid var(--border); background:#fff; border-radius:50%; width:26px; height:26px; font-size:11px; color:var(--muted); cursor:pointer;}
+  .kanban-dropdown-btn:hover{border-color:var(--gold); color:#8a6300;}
+  .kanban-dropdown-menu{display:none; position:absolute; top:calc(100% + 6px); right:0; background:#fff; border:1px solid var(--border); border-radius:10px; box-shadow:0 8px 24px rgba(4,20,50,.22); min-width:210px; max-height:260px; overflow-y:auto; z-index:20;}
+  .kanban-dropdown-menu.open{display:block;}
+  .kanban-dropdown-menu button{display:block; width:100%; text-align:left; border:none; background:none; padding:9px 14px; font-size:12px; color:var(--navy); cursor:pointer;}
+  .kanban-dropdown-menu button:hover{background:#f4f6f9;}
 
-  /* Bolinhas de revisão nos cards */
-  .review-dots{display:flex; gap:3px; align-items:center;}
+  /* Círculos de revisão (Pedro/Victor) */
+  .review-dots{display:flex; gap:6px; align-items:center;}
+  .review-dot-wrap{display:inline-flex; line-height:0;}
+  .review-dot-btn{display:inline-flex; line-height:0; border:none; background:none; padding:0; cursor:pointer; border-radius:50%;}
+  .review-dot-btn:disabled{cursor:default;}
+  .review-dot-btn:not(:disabled):hover{outline:2px solid var(--gold-light); outline-offset:2px;}
 
   /* Badges nos cards da Lista */
   .list-badges{display:flex; flex-direction:column; align-items:center; gap:3px;}
   .pub-badge-outline{display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:50%; background:transparent; border:1px solid var(--navy); color:var(--navy); font-size:9px; font-weight:700;}
+
+  /* Círculos de revisão, ao lado do tipo de post (card) / acima dele (modal) */
+  .tag-with-dots{display:flex; align-items:center; gap:6px;}
+  .dots-above-tag{display:flex; align-items:center; gap:6px; margin-bottom:6px;}
 </style>
 </head>
 <body>
 
-<button type="button" class="hamburger-btn" id="hamburgerBtn" onclick="toggleSidebar()" title="Menu">☰</button>
+<button type="button" class="hamburger-btn" id="hamburgerBtn" onclick="toggleSidebar()" title="Menu" aria-label="Abrir menu">☰</button>
 
+<div class="sidebar-hotzone" id="sidebarHotzone" onmouseenter="sidebarHoverEnter()"></div>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
-<nav class="sidebar" id="sidebar">
+<nav class="sidebar" id="sidebar" onmouseenter="sidebarHoverEnter()" onmouseleave="sidebarHoverLeave()">
   <div class="sidebar-head">Menu</div>
   <button type="button" class="sidebar-btn" id="sbPerfil" onclick="logoutUser()">👤 <span id="sbPerfilLabel">Perfil</span></button>
   <button type="button" class="sidebar-btn" onclick="backToLanding()">🗂 Campanhas</button>
@@ -317,13 +336,16 @@
 
   <div class="filters-panel" id="filtersPanel">
     <div class="toolbar">
-      <input type="text" id="searchBox" placeholder="Buscar por segmento, gancho ou tema..." oninput="renderAll()">
-      <span class="chip" id="chipStories" onclick="toggleFormato('Stories')">Stories</span>
-      <span class="chip" id="chipFeed" onclick="toggleFormato('Feed')">Feed</span>
-      <span class="chip" id="chipReels" onclick="toggleFormato('Reels')">Reels</span>
-      <select id="pubFilter" onchange="renderAll()"><option value="">Todos os públicos</option></select>
-      <select id="kanbanFilter" onchange="renderAll()"><option value="">Todas as etapas do Kanban</option></select>
-      <button class="legend-btn" onclick="toggleLegend()">Legenda de públicos ▾</button>
+      <label class="visually-hidden" for="searchBox">Buscar por segmento, gancho ou tema</label>
+      <input type="text" id="searchBox" name="search" placeholder="Buscar por segmento, gancho ou tema…" oninput="renderAll()">
+      <button type="button" class="chip" id="chipStories" onclick="toggleFormato('Stories')" aria-pressed="false">Stories</button>
+      <button type="button" class="chip" id="chipFeed" onclick="toggleFormato('Feed')" aria-pressed="false">Feed</button>
+      <button type="button" class="chip" id="chipReels" onclick="toggleFormato('Reels')" aria-pressed="false">Reels</button>
+      <label class="visually-hidden" for="pubFilter">Filtrar por público-alvo</label>
+      <select id="pubFilter" name="pubFilter" onchange="renderAll()"><option value="">Todos os públicos</option></select>
+      <label class="visually-hidden" for="kanbanFilter">Filtrar por etapa do Kanban</label>
+      <select id="kanbanFilter" name="kanbanFilter" onchange="renderAll()"><option value="">Todas as etapas do Kanban</option></select>
+      <button type="button" class="legend-btn" onclick="toggleLegend()">Legenda de públicos ▾</button>
     </div>
     <div class="legend-panel" id="legendPanel">
       <b>Legenda de Público-alvo</b>
@@ -349,16 +371,16 @@
 </div><!-- fim #appView -->
 
 <div class="backdrop" id="backdrop" onclick="if(event.target===this)closeModal()">
-  <div class="modal" id="modalBody"></div>
+  <div class="modal" id="modalBody" role="dialog" aria-modal="true" aria-label="Detalhes do post"></div>
 </div>
 
 <div class="util-backdrop" id="utilBackdrop" onclick="if(event.target===this)closeUtilModal()">
-  <div class="util-modal" id="utilModalBody"></div>
+  <div class="util-modal" id="utilModalBody" role="dialog" aria-modal="true"></div>
 </div>
 
 <div class="util-backdrop" id="loginBackdrop">
-  <div class="util-modal login-modal">
-    <button type="button" class="close" onclick="closeLoginModal()">✕</button>
+  <div class="util-modal login-modal" role="dialog" aria-modal="true" aria-label="Identificação do usuário">
+    <button type="button" class="close" onclick="closeLoginModal()" aria-label="Fechar">✕</button>
     <div id="loginStep1">
       <h3>Quem está editando?</h3>
       <p>Identifique-se para continuar.</p>
@@ -371,7 +393,7 @@
       <h3 id="loginUserLabel">—</h3>
       <p>Digite seu PIN de 4 dígitos.</p>
       <input type="password" id="loginPin" inputmode="numeric" maxlength="4" placeholder="••••" onkeydown="if(event.key==='Enter')submitLoginPin()">
-      <div class="login-error" id="loginError">PIN incorreto. Tente novamente.</div>
+      <div class="login-error" id="loginError" aria-live="polite">PIN incorreto. Tente novamente.</div>
       <div class="btn-row">
         <button class="opt-cancel" onclick="document.getElementById('loginStep1').style.display='block'; document.getElementById('loginStep2').style.display='none';">Voltar</button>
         <button class="opt-primary" onclick="submitLoginPin()">Entrar</button>
@@ -461,7 +483,6 @@ async function moveToStage(idx, newStage){
     try{
       await sb.from('posts').update({ kanban_stage: newStage }).eq('id', idx);
       await sb.from('audit_log').insert({ post_id: idx, user_id: currentUser.id, user_name: currentUser.name, action_type: 'kanban_move', field_key: null, from_value: String(oldStage), to_value: String(newStage) });
-      await setAllReviewsOk(idx);
     }catch(e){
       console.warn(e);
       p.__kanban = oldStage;
@@ -495,17 +516,18 @@ function renderKanban(){
     const cards = (byStage[stage]||[]).map(idx => {
       const p = posts[idx];
       return `<div class="kanban-card" draggable="true" ondragstart="kbDragStart(event, ${idx})" onclick="openPost(${idx})">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="tag-with-dots">
           <span class="tag ${p['Formato']}">${p['Formato']}</span>
-          ${reviewDotsHtml(idx)}
+          ${reviewDotsHtml(idx, 24)}
         </div>
         <div class="kc-seg">${p['Segmento/Página']}</div>
         <div class="kc-date">${fmtDate(p['Data'])}</div>
       </div>`;
     }).join('');
-    return `<div class="kanban-col" ondragover="event.preventDefault()" ondrop="kbDrop(event, ${stage})">
+    const isEmpty = !(byStage[stage]||[]).length;
+    return `<div class="kanban-col ${isEmpty?'is-empty':''}" ondragover="event.preventDefault()" ondrop="kbDrop(event, ${stage})">
       <div class="kanban-col-head"><span>${stage}. ${label}</span><span class="kc-count">${(byStage[stage]||[]).length}</span></div>
-      <div class="kanban-col-body">${cards || '<div class="kc-empty">—</div>'}</div>
+      <div class="kanban-col-body">${cards || '<div class="kc-empty">Nenhum post nesta etapa</div>'}</div>
     </div>`;
   }).join('');
 }
@@ -539,13 +561,55 @@ function enterCampaign(id){
   }, { allowGuest: true });
 }
 
+// Paleta de cores por campanha — a primeira campanha (AVCB, já existente) fica lilás.
+const CAMPAIGN_COLOR_PALETTE = ['#8E5BD9', '#1877C9', '#D69A2A', '#D9455B', '#1E7A44', '#07295F'];
+function campaignColor(campaignId){
+  const idx = CAMPAIGNS.findIndex(c => c.id === campaignId);
+  return CAMPAIGN_COLOR_PALETTE[(idx < 0 ? 0 : idx) % CAMPAIGN_COLOR_PALETTE.length];
+}
+
+const MONTH_NAMES_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+function landingCalMonths(){
+  const dates = CAMPAIGNS.filter(c => c.dateStart && c.dateEnd).flatMap(c => [c.dateStart, c.dateEnd]);
+  if(!dates.length) return [];
+  const parsed = dates.map(d => new Date(d+'T00:00:00'));
+  const min = new Date(Math.min(...parsed));
+  const max = new Date(Math.max(...parsed));
+  const months = [];
+  let y = min.getFullYear(), m = min.getMonth();
+  while(y < max.getFullYear() || (y === max.getFullYear() && m <= max.getMonth())){
+    months.push({ year: y, month: m+1, label: MONTH_NAMES_PT[m]+' '+y });
+    m++; if(m > 11){ m = 0; y++; }
+  }
+  return months;
+}
+
+function campaignsOnDate(iso){
+  return CAMPAIGNS.filter(c => c.dateStart && c.dateEnd && iso >= c.dateStart && iso <= c.dateEnd);
+}
+
+function computeCampaignProgress(campaignId){
+  const campPosts = posts.filter(p => p && p.__campaignId === campaignId);
+  if(!campPosts.length) return 0;
+  const published = campPosts.filter(p => (p.__kanban||2) === 9).length;
+  return Math.round((published / campPosts.length) * 100);
+}
+
 function renderLandingList(){
-  const cards = CAMPAIGNS.map(c => `
-    <div class="post-card campaign-card" onclick="enterCampaign('${c.id}')">
+  const cards = CAMPAIGNS.map(c => {
+    const pct = computeCampaignProgress(c.id);
+    const color = campaignColor(c.id);
+    return `
+    <div class="post-card campaign-card" style="border-left:6px solid ${color};" onclick="enterCampaign('${c.id}')">
       <div class="seg" style="font-size:16px;">${c.title}</div>
       <div class="gancho">${c.subtitle||''}</div>
-      <div class="foot"><span>Campanha ativa</span><span>Abrir →</span></div>
-    </div>`).join('');
+      <div class="campaign-progress" title="${pct}% dos posts publicados">
+        <div class="campaign-progress-bar" style="width:${pct}%; background:${color};"></div>
+      </div>
+      <div class="foot"><span>${pct}% publicado</span><span>Abrir →</span></div>
+    </div>`;
+  }).join('');
   document.getElementById('landingList').innerHTML = cards + `
     <div class="post-card campaign-card" style="border-style:dashed; text-align:center; cursor:pointer;" onclick="openNewCampaignModal()">
       <div class="seg" style="font-size:16px;">+ Nova campanha</div>
@@ -557,18 +621,41 @@ function renderLandingKanban(){
   document.getElementById('landingKanban').innerHTML = CAMPAIGN_STAGES.map((label, i) => {
     const stage = i+1;
     const cardsForStage = CAMPAIGNS.filter(c => computeCampaignStage(c.id) === stage);
-    const cards = cardsForStage.map(c => `<div class="kanban-card" onclick="enterCampaign('${c.id}')"><div class="kc-seg">${c.title}</div></div>`).join('');
+    const cards = cardsForStage.map(c => {
+      const color = campaignColor(c.id);
+      return `<div class="kanban-card campaign-bar" style="background:${color}; border-color:${color};" onclick="enterCampaign('${c.id}')"><div class="kc-seg" style="color:#fff;">${c.title}</div></div>`;
+    }).join('');
     return `<div class="kanban-col"><div class="kanban-col-head"><span>${stage}. ${label}</span></div><div class="kanban-col-body">${cards || '<div class="kc-empty">—</div>'}</div></div>`;
   }).join('');
 }
 
 function renderLandingCal(){
-  document.getElementById('landingCal').innerHTML = CAMPAIGNS.map(c => `
-    <div class="post-card campaign-card" onclick="enterCampaign('${c.id}')">
-      <div class="seg">${c.title}</div>
-      <div class="gancho">Período: ${c.dateStart?fmtDate(c.dateStart):'?'} a ${c.dateEnd?fmtDate(c.dateEnd):'?'}</div>
-      <div class="foot"><span>Ver no calendário →</span></div>
-    </div>`).join('');
+  const months = landingCalMonths();
+  const container = document.getElementById('landingCal');
+  if(!months.length){
+    container.innerHTML = '<p style="color:var(--muted-text);padding:20px 0;">Nenhuma campanha com datas definidas ainda.</p>';
+    return;
+  }
+  const gridsHtml = months.map(({year, month, label}) => {
+    const first = new Date(year, month-1, 1);
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const startDow = first.getDay();
+    let cells = '';
+    for(let i=0; i<startDow; i++) cells += `<div class="cal-day empty"></div>`;
+    for(let d=1; d<=daysInMonth; d++){
+      const iso = `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const covering = campaignsOnDate(iso);
+      const bars = covering.map(c => `<div class="landing-cal-bar" style="background:${campaignColor(c.id)};" title="${c.title}"></div>`).join('');
+      cells += `<div class="cal-day ${covering.length?'has-posts':''}" ${covering.length?`onclick="enterCampaign('${covering[0].id}')"`:''}>
+        <div class="num">${d}</div>
+        <div class="landing-cal-bars">${bars}</div>
+      </div>`;
+    }
+    return `<div class="month-block"><div class="month-title">${label}</div>
+      <div class="cal-grid">${DOW.map(dw=>`<div class="cal-dow">${dw}</div>`).join('')}${cells}</div>
+    </div>`;
+  }).join('');
+  container.innerHTML = gridsHtml;
 }
 
 // ---- Nova campanha ----
@@ -581,9 +668,10 @@ function openNewCampaignModal(){
       <input type="date" id="ncStart" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:13px;">
       <input type="date" id="ncEnd" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:13px;">
     </div>
-    <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);margin-bottom:14px;text-align:left;">
+    <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);margin-bottom:10px;text-align:left;">
       <input type="checkbox" id="ncDuplicate"> Duplicar todos os posts da campanha "AVCB 20/07 a 23/08/2026" como ponto de partida
     </label>
+    <div class="login-error" id="ncError" aria-live="polite" style="text-align:left;">Digite um nome para a campanha.</div>
     <div class="btn-row">
       <button class="opt-cancel" onclick="closeUtilModal()">Cancelar</button>
       <button class="opt-primary" onclick="submitNewCampaign()">Criar campanha</button>
@@ -594,7 +682,7 @@ function openNewCampaignModal(){
 function submitNewCampaign(){
   requireLogin(async () => {
     const title = document.getElementById('ncTitle').value.trim();
-    if(!title){ alert('Digite um nome para a campanha.'); return; }
+    if(!title){ document.getElementById('ncError').style.display = 'block'; document.getElementById('ncTitle').focus(); return; }
     const subtitle = document.getElementById('ncSubtitle').value.trim();
     const dateStart = document.getElementById('ncStart').value || null;
     const dateEnd = document.getElementById('ncEnd').value || null;
@@ -639,17 +727,15 @@ function setLandingView(v){
   else renderLandingCal();
 }
 
-// ---- Switches de revisão (Não Revisado / Ajustar / OK), por usuário, por campo ----
-const USER_NAMES = ['Victor Moraes', 'Pedro Cavani', 'Allan Lauzid'];
-const USER_INITIALS = { 'Victor Moraes':'V', 'Pedro Cavani':'P', 'Allan Lauzid':'A' };
-const REVIEW_STATES = ['nao_revisado', 'ajustar', 'ok'];
-const REVIEW_LABELS = { nao_revisado:'NR', ajustar:'Aj', ok:'OK' };
-let currentPostReview = {}; // { [fieldKey]: { [userName]: state } }
+// ---- Revisão (um toggle on/off por post, por Pedro e por Victor) ----
+const REVIEW_FIELD_KEY = '_post';
+const REVIEW_COLOR_PEDRO = '#EDFF24';
+const REVIEW_COLOR_VICTOR = '#43FF24';
 
-let allReviewData = {}; // { [postId]: { [fieldKey]: { [userName]: state } } } -- para as bolinhas nos cards
+let allReviewData = {}; // { [postId]: { _post: { [userName]: 'ok'|'nao_revisado' } } } -- para os círculos
 
 async function loadAllReviewData(){
-  const { data, error } = await sb.from('post_field_review').select('post_id, field_key, user_name, state');
+  const { data, error } = await sb.from('post_field_review').select('post_id, field_key, user_name, state').eq('field_key', REVIEW_FIELD_KEY);
   if(error){ console.warn(error); return; }
   allReviewData = {};
   (data||[]).forEach(row => {
@@ -660,7 +746,7 @@ async function loadAllReviewData(){
 }
 
 async function refreshReviewDataForPost(idx){
-  const { data, error } = await sb.from('post_field_review').select('field_key, user_name, state').eq('post_id', idx);
+  const { data, error } = await sb.from('post_field_review').select('field_key, user_name, state').eq('post_id', idx).eq('field_key', REVIEW_FIELD_KEY);
   if(error) return;
   const map = {};
   (data||[]).forEach(row => {
@@ -672,92 +758,65 @@ async function refreshReviewDataForPost(idx){
   if(state.view === 'kanban') renderKanban();
 }
 
-function reviewCompletion(idx, userName){
-  const p = posts[idx];
-  if(!p) return 0;
-  const keys = fieldKeysForPost(p);
-  if(!keys.length) return 0;
-  const data = allReviewData[idx] || {};
-  let ok = 0;
-  keys.forEach(k => { if(data[k] && data[k][userName] === 'ok') ok++; });
-  if(ok === 0) return 0;
-  if(ok === keys.length) return 1;
-  return 0.5;
+function isPostReviewed(idx, userName){
+  const d = allReviewData[idx];
+  return !!(d && d[REVIEW_FIELD_KEY] && d[REVIEW_FIELD_KEY][userName] === 'ok');
 }
 
-function reviewDotSvg(ratio, color){
-  if(ratio <= 0) return '';
-  if(ratio >= 1) return `<svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4.5" fill="${color}"></circle></svg>`;
-  return `<svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="none" stroke="${color}" stroke-width="1.3"></circle><path d="M5,1 A4,4 0 0,1 5,9 Z" fill="${color}"></path></svg>`;
+function reviewDotSvg(isOn, color, size){
+  size = size || 10;
+  const r = size/2 - 1.6;
+  const cx = size/2, cy = size/2;
+  if(isOn) return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}"></circle></svg>`;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="3"></circle></svg>`;
 }
 
-function reviewDotsHtml(idx){
-  const pedro = reviewCompletion(idx, 'Pedro Cavani');
-  const victor = reviewCompletion(idx, 'Victor Moraes');
-  const html = reviewDotSvg(pedro, '#D69A2A') + reviewDotSvg(victor, '#8BC34A');
-  return html ? `<span class="review-dots" title="Amarelo: revisão do Pedro · Verde: revisão do Victor">${html}</span>` : '';
+// versão só de exibição (cards de Lista e Kanban) — não clicável
+function reviewDotsHtml(idx, size){
+  const pedroOn = isPostReviewed(idx, 'Pedro Cavani');
+  const victorOn = isPostReviewed(idx, 'Victor Moraes');
+  const pedroTitle = (pedroOn?'Revisado':'Não revisado') + ' por Pedro Cavani';
+  const victorTitle = (victorOn?'Revisado':'Não revisado') + ' por Victor Moraes';
+  return `<span class="review-dots">
+    <span class="review-dot-wrap" title="${pedroTitle}">${reviewDotSvg(pedroOn, REVIEW_COLOR_PEDRO, size)}</span>
+    <span class="review-dot-wrap" title="${victorTitle}">${reviewDotSvg(victorOn, REVIEW_COLOR_VICTOR, size)}</span>
+  </span>`;
 }
 
-async function loadReviewForPost(idx){
-  currentPostReview = {};
-  const { data, error } = await sb.from('post_field_review').select('field_key, user_name, state').eq('post_id', idx);
-  if(error){ console.warn(error); return; }
-  (data||[]).forEach(row => {
-    if(!currentPostReview[row.field_key]) currentPostReview[row.field_key] = {};
-    currentPostReview[row.field_key][row.user_name] = row.state;
-  });
+// versão clicável (só dentro do macro do post) — só o dono consegue clicar
+function reviewToggleButtonsHtml(idx, size){
+  const pedroOn = isPostReviewed(idx, 'Pedro Cavani');
+  const victorOn = isPostReviewed(idx, 'Victor Moraes');
+  const pedroTitle = (pedroOn?'Revisado':'Não revisado') + ' por Pedro Cavani';
+  const victorTitle = (victorOn?'Revisado':'Não revisado') + ' por Victor Moraes';
+  const pedroClickable = currentUser && currentUser.name === 'Pedro Cavani';
+  const victorClickable = currentUser && currentUser.name === 'Victor Moraes';
+  return `<span class="review-dots">
+    <button type="button" class="review-dot-btn" title="${pedroTitle}" ${pedroClickable?`onclick="togglePostReview(${idx}, 'Pedro Cavani')"`:'disabled'}>${reviewDotSvg(pedroOn, REVIEW_COLOR_PEDRO, size)}</button>
+    <button type="button" class="review-dot-btn" title="${victorTitle}" ${victorClickable?`onclick="togglePostReview(${idx}, 'Victor Moraes')"`:'disabled'}>${reviewDotSvg(victorOn, REVIEW_COLOR_VICTOR, size)}</button>
+  </span>`;
 }
 
-function reviewStateFor(key, userName){
-  return (currentPostReview[key] && currentPostReview[key][userName]) || 'nao_revisado';
-}
-
-async function upsertReview(idx, key, userName, newState){
-  if(!currentPostReview[key]) currentPostReview[key] = {};
-  currentPostReview[key][userName] = newState;
+async function togglePostReview(idx, userName){
+  if(!currentUser || currentUser.name !== userName){
+    alert('Você não pode alterar essa marcação — ela pertence a outro usuário.');
+    return;
+  }
+  const turningOn = !isPostReviewed(idx, userName);
+  const msg = turningOn
+    ? `Confirma a mudança para "Revisado por ${userName}"?`
+    : `Confirma a mudança para "Não revisado por ${userName}"?`;
+  if(!confirm(msg)) return;
+  const newState = turningOn ? 'ok' : 'nao_revisado';
   try{
     await sb.from('post_field_review').upsert(
-      { post_id: idx, field_key: key, user_id: currentUser.id, user_name: userName, state: newState },
+      { post_id: idx, field_key: REVIEW_FIELD_KEY, user_id: currentUser.id, user_name: userName, state: newState },
       { onConflict: 'post_id,field_key,user_name' }
     );
-    await sb.from('audit_log').insert({ post_id: idx, user_id: currentUser.id, user_name: currentUser.name, action_type: 'review_change', field_key: key, to_value: newState });
+    await sb.from('audit_log').insert({ post_id: idx, user_id: currentUser.id, user_name: currentUser.name, action_type: 'review_change', field_key: REVIEW_FIELD_KEY, to_value: newState });
   }catch(e){ console.warn(e); }
-  refreshReviewDataForPost(idx);
-}
-
-async function setAllReviewsOk(idx){
-  const p = posts[idx];
-  if(!p) return;
-  const keys = fieldKeysForPost(p);
-  const rows = [];
-  keys.forEach(key => {
-    if(!currentPostReview[key]) currentPostReview[key] = {};
-    USER_NAMES.forEach(name => {
-      currentPostReview[key][name] = 'ok';
-      rows.push({ post_id: idx, field_key: key, user_id: currentUser.id, user_name: name, state: 'ok' });
-    });
-  });
-  try{
-    await sb.from('post_field_review').upsert(rows, { onConflict: 'post_id,field_key,user_name' });
-  }catch(e){ console.warn(e); }
-  refreshReviewDataForPost(idx);
-}
-
-async function setReviewState(idx, key, userName, newState){
-  if(!currentUser || currentUser.name !== userName){ alert('Você só pode alterar o seu próprio switch de revisão.'); return; }
-  await upsertReview(idx, key, userName, newState);
-  renderPostModal();
-}
-
-function reviewSwitchHtml(idx, key){
-  return `<div class="review-row">` + USER_NAMES.map(name => {
-    const st = reviewStateFor(key, name);
-    const mine = currentUser && currentUser.name === name;
-    return `<div class="review-switch ${mine?'mine':'readonly'}" title="${name}">
-      <span class="rs-name">${USER_INITIALS[name]}</span>
-      ${REVIEW_STATES.map(s => `<button type="button" class="rs-opt ${st===s?('active state-'+s):''}" ${mine?`onclick="setReviewState(${idx}, '${key}', '${name}', '${s}')"`:'disabled'}>${REVIEW_LABELS[s]}</button>`).join('')}
-    </div>`;
-  }).join('') + `</div>`;
+  await refreshReviewDataForPost(idx);
+  if(currentPostIdx === idx && document.getElementById('backdrop').classList.contains('active')) renderPostModal();
 }
 
 // ---- Suggested edits (review mode) ----
@@ -803,15 +862,48 @@ function updateUserBadge(){
   else el.textContent = 'Perfil';
 }
 
-// ---- Sidebar retrátil ----
+// ---- Sidebar retrátil (clique fixa aberto; no desktop, passar o mouse na borda esquerda também abre) ----
+let sidebarPinned = false;
+let sidebarHovering = false;
+let sidebarHoverTimer = null;
+
+function isDesktopWidth(){ return window.matchMedia('(min-width:761px)').matches; }
+
+function updateSidebarVisibility(){
+  const open = sidebarPinned || sidebarHovering;
+  document.getElementById('sidebar').classList.toggle('open', open);
+  // o fundo escurecido só aparece quando o menu foi fixado pelo clique (hover é só uma prévia leve)
+  document.getElementById('sidebarOverlay').classList.toggle('open', sidebarPinned);
+}
+
 function toggleSidebar(){
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebarOverlay').classList.toggle('open');
+  sidebarPinned = !sidebarPinned;
+  if(!sidebarPinned) sidebarHovering = false;
+  updateSidebarVisibility();
 }
+
 function closeSidebar(){
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebarOverlay').classList.remove('open');
+  sidebarPinned = false;
+  sidebarHovering = false;
+  updateSidebarVisibility();
 }
+
+function sidebarHoverEnter(){
+  if(!isDesktopWidth()) return;
+  clearTimeout(sidebarHoverTimer);
+  sidebarHovering = true;
+  updateSidebarVisibility();
+}
+
+function sidebarHoverLeave(){
+  if(!isDesktopWidth()) return;
+  clearTimeout(sidebarHoverTimer);
+  sidebarHoverTimer = setTimeout(() => {
+    sidebarHovering = false;
+    updateSidebarVisibility();
+  }, 180);
+}
+
 function toggleFiltersPanel(){
   document.getElementById('filtersPanel').classList.toggle('open');
   closeSidebar();
@@ -934,8 +1026,8 @@ function toggleLegend(){ document.getElementById('legendPanel').classList.toggle
 
 function toggleFormato(f){
   const chip = document.getElementById('chip'+f);
-  if(state.formatos.has(f)){ state.formatos.delete(f); chip.classList.remove('active-'+f.toLowerCase()); }
-  else { state.formatos.add(f); chip.classList.add('active-'+f.toLowerCase()); }
+  if(state.formatos.has(f)){ state.formatos.delete(f); chip.classList.remove('active-'+f.toLowerCase()); chip.setAttribute('aria-pressed','false'); }
+  else { state.formatos.add(f); chip.classList.add('active-'+f.toLowerCase()); chip.setAttribute('aria-pressed','true'); }
   renderAll();
 }
 
@@ -1002,13 +1094,13 @@ function postCardHtml(p){
   const stage = p.__kanban || 2;
   return `<div class="post-card" onclick="openPost(${idx})">
     <div class="row1">
-      <span class="tag ${p['Formato']}">${p['Formato']}</span>
-      <div style="display:flex; align-items:center; gap:8px;">
-        ${reviewDotsHtml(idx)}
-        <div class="list-badges">
-          <span class="pub-badge" title="${KANBAN_STAGES[stage-1]}">${stage}</span>
-          <span class="pub-badge-outline" title="${p['Público-alvo']}">${letter}</span>
-        </div>
+      <div class="tag-with-dots">
+        <span class="tag ${p['Formato']}">${p['Formato']}</span>
+        ${reviewDotsHtml(idx, 24)}
+      </div>
+      <div class="list-badges">
+        <span class="pub-badge" title="${KANBAN_STAGES[stage-1]}">${stage}</span>
+        <span class="pub-badge-outline" title="${p['Público-alvo']}">${letter}</span>
       </div>
     </div>
     <div class="seg">${p['Segmento/Página']}</div>
@@ -1063,7 +1155,7 @@ function openDay(iso){
   const list = filteredPosts().filter(p => p['Data'] === iso);
   if(list.length === 1){ openPost(posts.indexOf(list[0])); return; }
   const modal = document.getElementById('modalBody');
-  modal.innerHTML = `<button class="close" onclick="closeModal()">✕</button>
+  modal.innerHTML = `<button class="close" onclick="closeModal()" aria-label="Fechar">✕</button>
     <h2>${fmtDate(iso)}</h2>
     <p style="font-size:12.5px;color:#66758A;margin-bottom:16px;">${list.length} posts nesta data. Clique para ver o conteúdo completo.</p>
     ${list.map(p => {
@@ -1083,26 +1175,43 @@ function field(label, value, key){
   const editableAttr = editMode && key ? ` contenteditable="true" data-key="${key}"` : '';
   // ao entrar em modo de edição, parte da última sugestão salva (se existir) em vez do texto original,
   // para não perder edições anteriores.
-  const displayValue = (editMode && sug) ? sug.text : value;
-  const sugHtml = (sug && !editMode) ? `<div class="suggestion"><div class="sug-lbl">Sugestão de Edição de ${escapeHtml(sug.editor||'—')}</div><div class="sug-txt">${escapeHtml(sug.text)}</div><button type="button" class="sug-hist-btn" onclick="showFieldHistory(${idx}, '${key}')">Ver versão original</button></div>` : '';
-  return `<div class="field"><div class="lbl">${label}</div><div class="val"${editableAttr}>${displayValue}</div>${sugHtml}</div>`;
+  // Quando existe sugestão e não está em modo de edição, mostra a sugestão como texto
+  // principal (a versão original só aparece se o usuário clicar em "Ver histórico").
+  const displayValue = sug ? sug.text : value;
+  const valClass = (sug && !editMode) ? ' has-suggestion' : '';
+  const sugHtml = (sug && !editMode) ? `<div class="suggestion"><div class="sug-lbl">Sugestão de Edição de ${escapeHtml(sug.editor||'—')}</div><button type="button" class="sug-hist-btn" onclick="showFieldHistory(${idx}, '${key}')">Ver histórico</button></div>` : '';
+  return `<div class="field"><div class="lbl">${label}</div><div class="val${valClass}"${editableAttr}>${displayValue}</div>${sugHtml}</div>`;
 }
 
 function stageRatchetHtml(idx){
   const p = posts[idx];
   const stage = p.__kanban || 2;
-  return `<div class="stage-ratchet-wrap">
+  return `
     <div class="stage-ratchet">
       <button type="button" class="sr-arrow" ${stage<=1?'disabled':''} onclick="moveToStage(${idx}, ${stage-1})" title="Etapa anterior">‹</button>
       <span class="sr-label">${KANBAN_STAGES[stage-1]}</span>
       <button type="button" class="sr-arrow" ${stage>=10?'disabled':''} onclick="moveToStage(${idx}, ${stage+1})" title="Próxima etapa">›</button>
     </div>
-    <select class="stage-select-mini" onchange="if(this.value)moveToStage(${idx}, parseInt(this.value,10)); this.value='';">
-      <option value="">Mudar Kanban</option>
-      ${KANBAN_STAGES.map((lbl,i)=>`<option value="${i+1}">${lbl}</option>`).join('')}
-    </select>
-  </div>`;
+    <div class="kanban-dropdown-wrap" id="kanbanDropdownWrap">
+      <button type="button" class="kanban-dropdown-btn" onclick="toggleKanbanDropdown()" aria-label="Mudar Kanban" title="Mudar Kanban">▾</button>
+      <div class="kanban-dropdown-menu" id="kanbanDropdownMenu">
+        ${KANBAN_STAGES.map((lbl,i)=>`<button type="button" onclick="moveToStage(${idx}, ${i+1}); closeKanbanDropdown();">${i+1}. ${lbl}</button>`).join('')}
+      </div>
+    </div>`;
 }
+
+function toggleKanbanDropdown(){
+  const el = document.getElementById('kanbanDropdownMenu');
+  if(el) el.classList.toggle('open');
+}
+function closeKanbanDropdown(){
+  const el = document.getElementById('kanbanDropdownMenu');
+  if(el) el.classList.remove('open');
+}
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('kanbanDropdownWrap');
+  if(wrap && !wrap.contains(e.target)) closeKanbanDropdown();
+});
 
 function editActionButtonsHtml(){
   return editMode
@@ -1116,9 +1225,8 @@ async function showFieldHistory(idx, key){
   const { data, error } = await sb.from('post_field_versions')
     .select('value, editor_name, edited_at')
     .eq('post_id', idx).eq('field_key', key)
-    .order('edited_at', { ascending: true });
+    .order('edited_at', { ascending: false }); // mais recente primeiro
   let html = '<h3>Histórico do campo</h3>';
-  html += `<div class="hist-item"><div class="hist-meta">Versão original</div><div class="hist-txt">${escapeHtml(original)}</div></div>`;
   if(error){
     html += '<p class="util-empty">Não foi possível carregar o histórico completo agora.</p>';
   } else {
@@ -1126,6 +1234,7 @@ async function showFieldHistory(idx, key){
       html += `<div class="hist-item"><div class="hist-meta">${escapeHtml(row.editor_name||'—')} · ${new Date(row.edited_at).toLocaleString('pt-BR')}</div><div class="hist-txt">${escapeHtml(row.value||'')}</div></div>`;
     });
   }
+  html += `<div class="hist-item"><div class="hist-meta">Versão original</div><div class="hist-txt">${escapeHtml(original)}</div></div>`;
   html += '<div class="btn-row" style="margin-top:10px;"><button class="opt-cancel" onclick="closeUtilModal()">Fechar</button></div>';
   document.getElementById('utilModalBody').innerHTML = html;
 }
@@ -1135,7 +1244,6 @@ async function openPost(idx){
   editMode = false;
   document.getElementById('backdrop').classList.add('active');
   document.getElementById('modalBody').innerHTML = '<p style="padding:24px;color:#66758A;">Carregando...</p>';
-  await loadReviewForPost(idx);
   renderPostModal();
 }
 
@@ -1165,11 +1273,14 @@ function renderPostModal(){
   }
 
   const modal = document.getElementById('modalBody');
-  modal.innerHTML = `<button class="close" onclick="closeModal()">✕</button>
-    ${stageRatchetHtml(idx)}
+  modal.innerHTML = `<button class="close" onclick="closeModal()" aria-label="Fechar">✕</button>
+    <div class="modal-top-row">
+      ${reviewToggleButtonsHtml(idx, 28)}
+      <div class="stage-ratchet-wrap">${stageRatchetHtml(idx)}</div>
+    </div>
     <div class="meta-row">
       <span class="tag ${p['Formato']}">${p['Formato']}</span>
-      <span class="pub-badge">${letter}</span>
+      <span class="pub-badge-outline" title="${p['Público-alvo']}">${letter}</span>
       <span style="font-size:12.5px;color:#66758A;">${fmtDate(p['Data'])} · ${p['Semana']}</span>
     </div>
     <h2>${p['Segmento/Página']}</h2>
@@ -1222,7 +1333,6 @@ async function saveEdits(){
     try{
       await sb.from('post_field_versions').insert({ post_id: idx, field_key: key, value: entry.text, edited_by: currentUser.id, editor_name: currentUser.name });
       await sb.from('audit_log').insert({ post_id: idx, user_id: currentUser.id, user_name: currentUser.name, action_type: 'edit_field', field_key: key, to_value: entry.text });
-      await upsertReview(idx, key, currentUser.name, 'ok');
       entry.synced = true;
     }catch(e){ console.warn('Falha ao salvar no Supabase, ficará pendente para o botão Salvar', e); }
   }
@@ -1352,6 +1462,13 @@ function closeModal(){
 }
 document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
 
+window.addEventListener('beforeunload', (e) => {
+  if(editMode && hasUnsavedChanges()){
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+
 // ---- Export / Import de sugestões ----
 const EXPORT_FIELD_LABELS = {
   pub:'Público-alvo', dor:'Dor / Intenção', gancho:'Gancho', objetivo:'Objetivo do post',
@@ -1475,9 +1592,26 @@ function parseImportedText(text){
   alert('Importação concluída: ' + imported + ' campo(s) processado(s).');
 }
 
+function setupScrollLock(){
+  const ids = ['backdrop', 'utilBackdrop', 'loginBackdrop'];
+  const check = () => {
+    const anyOpen = ids.some(id => {
+      const el = document.getElementById(id);
+      return el && el.classList.contains('active');
+    });
+    document.body.style.overflow = anyOpen ? 'hidden' : '';
+  };
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if(el) new MutationObserver(check).observe(el, { attributes: true, attributeFilter: ['class'] });
+  });
+  check();
+}
+
 (async function init(){
   tryRestoreSession();
   updateUserBadge();
+  setupScrollLock();
   await loadCampaigns();
   await loadPostsFromSupabase();
   await loadAllReviewData();
