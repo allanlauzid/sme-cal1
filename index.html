@@ -219,6 +219,10 @@
   .landing-cal-bars{display:flex; flex-direction:column; gap:2px; margin-top:3px;}
   .landing-cal-bar{height:7px; border-radius:5px;}
 
+  /* Toast de confirmação */
+  .toast{position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(10px); background:var(--navy-deep); color:#fff; padding:12px 22px; border-radius:10px; font-size:13px; font-weight:600; box-shadow:0 8px 24px rgba(4,20,50,.3); opacity:0; pointer-events:none; z-index:950; transition:opacity .32s ease, transform .32s ease;}
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
   /* Cabeçalho centralizado (landing e campanha) */
   .topbar-centered{max-width:1200px; margin:0 auto; text-align:center;}
   .topbar-centered h1{margin:0 0 4px; font-size:20px;}
@@ -284,11 +288,13 @@
 
 <button type="button" class="hamburger-btn" id="hamburgerBtn" onclick="toggleSidebar()" title="Menu" aria-label="Abrir menu">☰</button>
 
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
 <div class="sidebar-hotzone" id="sidebarHotzone" onmouseenter="sidebarHoverEnter()"></div>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 <nav class="sidebar" id="sidebar" onmouseenter="sidebarHoverEnter()" onmouseleave="sidebarHoverLeave()">
   <div class="sidebar-head">Menu</div>
-  <button type="button" class="sidebar-btn" id="sbPerfil" onclick="logoutUser()">👤 <span id="sbPerfilLabel">Perfil</span></button>
+  <button type="button" class="sidebar-btn" id="sbPerfil" onclick="handleProfileClick()">👤 <span id="sbPerfilLabel">Perfil</span></button>
   <button type="button" class="sidebar-btn" onclick="backToLanding()">🗂 Campanhas</button>
   <button type="button" class="sidebar-btn" id="btnSalvar" onclick="salvarTudo()">💾 Salvar</button>
   <div class="sidebar-offline" id="offlineWrap">
@@ -977,6 +983,28 @@ async function submitLoginPin(){
   if(cb) cb();
 }
 
+let toastTimer = null;
+function showToast(msg){
+  const el = document.getElementById('toast');
+  if(!el) return;
+  el.textContent = msg;
+  clearTimeout(toastTimer);
+  el.classList.remove('show');
+  // força reflow pra reiniciar a transição mesmo se um toast já estava visível
+  void el.offsetWidth;
+  requestAnimationFrame(() => el.classList.add('show'));
+  toastTimer = setTimeout(() => { el.classList.remove('show'); }, 2400);
+}
+
+function handleProfileClick(){
+  if(currentUser || isGuest){
+    logoutUser();
+  } else {
+    closeSidebar();
+    requireLogin(() => {}, { allowGuest: true });
+  }
+}
+
 function logoutUser(){
   if(!currentUser && !isGuest) return;
   if(!confirm('Sair da identificação atual?')) return;
@@ -985,6 +1013,7 @@ function logoutUser(){
   try{ sessionStorage.removeItem(CURRENT_USER_KEY); }catch(e){}
   updateUserBadge();
   backToLanding();
+  showToast('Você saiu da identificação.');
 }
 
 function escapeHtml(s){ const d = document.createElement('div'); d.innerText = s == null ? '' : s; return d.innerHTML; }
