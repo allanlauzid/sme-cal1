@@ -740,16 +740,31 @@ function openNewPostModal(){
     if(!isAllan()){ alert('Somente Allan pode criar posts.'); return; }
     if(!currentCampaignId){ alert('Abra uma campanha primeiro.'); return; }
     const stageOptions = KANBAN_STAGES.map((lbl,i)=>`<option value="${i+1}">${i+1}. ${lbl}</option>`).join('');
+    const pubOptions = '<option value="">Selecione…</option>' + Object.keys(pubLabel).map(full=>`<option value="${escapeHtml(full)}">${escapeHtml(full)} (${pubLabel[full]})</option>`).join('');
+    const inp = 'style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:13px;"';
+    const ta = 'style="width:100%;min-height:70px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:13px;font-family:inherit;"';
     openUtilModal(`
-      <h3>Adicionar post</h3>
-      <input type="date" id="npData" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:13px;">
-      <input type="text" id="npTitulo" placeholder="Título (ex.: segmento/página)" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:13px;">
-      <input type="text" id="npSubtitulo" placeholder="Subtítulo (texto ou link https://...)" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:13px;">
-      <textarea id="npTopicos" placeholder="Tópicos internos (um por linha)" style="width:100%;min-height:90px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:13px;font-family:inherit;"></textarea>
-      <select id="npFormato" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:13px;">
+      <h3>Criar post</h3>
+      <div style="max-height:60vh;overflow-y:auto;text-align:left;padding-right:4px;">
+      <input type="date" id="npData" ${inp}>
+      <input type="text" id="npTitulo" placeholder="Segmento/Página (título)" ${inp}>
+      <input type="text" id="npUrl" placeholder="URL de apoio" ${inp}>
+      <select id="npFormato" ${inp}>
         <option value="Stories">Stories</option><option value="Feed">Feed</option><option value="Reels">Reels</option>
       </select>
-      <select id="npKanban" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:13px;">${stageOptions}</select>
+      <select id="npPub" ${inp}>${pubOptions}</select>
+      <select id="npKanban" ${inp}>${stageOptions}</select>
+      <textarea id="npDor" placeholder="Dor / Intenção" ${ta}></textarea>
+      <textarea id="npGancho" placeholder="Gancho" ${ta}></textarea>
+      <textarea id="npObjetivo" placeholder="Objetivo do post" ${ta}></textarea>
+      <textarea id="npEstrutura" placeholder="Estrutura" ${ta}></textarea>
+      <textarea id="npTextoArte" placeholder="Texto da arte" ${ta}></textarea>
+      <textarea id="npLegenda" placeholder="Legenda / copy" ${ta}></textarea>
+      <textarea id="npCta" placeholder="CTA" ${ta}></textarea>
+      <textarea id="npPrompt" placeholder="Prompt generativo de imagem" ${ta}></textarea>
+      <input type="text" id="npTom" placeholder="Tom obrigatório" ${inp}>
+      <input type="text" id="npStatus" placeholder="Status" ${inp}>
+      </div>
       <div class="login-error" id="npError" aria-live="polite" style="text-align:left;">Preencha ao menos a data e o título.</div>
       <div class="btn-row">
         <button class="opt-cancel" onclick="closeUtilModal()">Cancelar</button>
@@ -765,19 +780,24 @@ function submitNewPost(){
     const data = document.getElementById('npData').value;
     const titulo = document.getElementById('npTitulo').value.trim();
     if(!data || !titulo){ document.getElementById('npError').style.display = 'block'; return; }
-    const subtitulo = document.getElementById('npSubtitulo').value.trim();
-    const topicos = document.getElementById('npTopicos').value.trim();
     const formato = document.getElementById('npFormato').value;
     const kanban = parseInt(document.getElementById('npKanban').value, 10) || 1;
-    const isLink = /^https?:\/\//i.test(subtitulo);
 
     const nextId = posts.reduce((max, p) => p ? Math.max(max, p.__id) : max, -1) + 1;
     const fields = {
       'Data': data, 'Semana': diaSemana(data), 'Formato': formato, 'Segmento/Página': titulo,
-      'URL de apoio': isLink ? subtitulo : '', 'Público-alvo': '', 'Dor/Intenção': '',
-      'Gancho': isLink ? '' : subtitulo, 'Objetivo do post': '', 'Estrutura': topicos,
-      'Texto da arte': '', 'Legenda/copy': '', 'CTA': '', 'Prompt generativo de imagem': '',
-      'Tom obrigatório': '', 'Status': ''
+      'URL de apoio': document.getElementById('npUrl').value.trim(),
+      'Público-alvo': document.getElementById('npPub').value,
+      'Dor/Intenção': document.getElementById('npDor').value.trim(),
+      'Gancho': document.getElementById('npGancho').value.trim(),
+      'Objetivo do post': document.getElementById('npObjetivo').value.trim(),
+      'Estrutura': document.getElementById('npEstrutura').value.trim(),
+      'Texto da arte': document.getElementById('npTextoArte').value.trim(),
+      'Legenda/copy': document.getElementById('npLegenda').value.trim(),
+      'CTA': document.getElementById('npCta').value.trim(),
+      'Prompt generativo de imagem': document.getElementById('npPrompt').value.trim(),
+      'Tom obrigatório': document.getElementById('npTom').value.trim(),
+      'Status': document.getElementById('npStatus').value.trim()
     };
     const row = { id: nextId, data, dow: diaSemana(data), tipo: formato, titulo, fields, kanban_stage: kanban, campaign_id: currentCampaignId };
     const { error } = await sb.from('posts').insert(row);
@@ -944,13 +964,10 @@ function isAllan(){ return !!(currentUser && currentUser.name === 'Allan Lauzid'
 
 function updatePermissionUI(){
   const allan = isAllan();
-  ['btnAddPost','btnAddStage'].forEach(id => {
+  ['btnAddPost','btnAddStage','btnAddPostList'].forEach(id => {
     const btn = document.getElementById(id);
     if(!btn) return;
-    btn.disabled = !allan;
-    btn.style.opacity = allan ? '1' : '.5';
-    btn.style.cursor = allan ? 'pointer' : 'not-allowed';
-    btn.title = allan ? '' : (id === 'btnAddPost' ? 'Somente Allan pode criar posts' : 'Somente Allan pode criar posições');
+    btn.style.display = allan ? '' : 'none';
   });
 }
 
@@ -1240,12 +1257,16 @@ function renderList(){
   const byDate = {};
   list.forEach(p => { (byDate[p['Data']] = byDate[p['Data']] || []).push(p); });
   const dates = Object.keys(byDate).sort();
-  if(!dates.length){ container.innerHTML = '<p style="color:#66758A;padding:20px 0;">Nenhum post encontrado com esses filtros.</p>'; return; }
-  container.innerHTML = dates.map(date => {
+  const addBtnHtml = `<div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+    <button type="button" class="legend-btn" id="btnAddPostList" onclick="openNewPostModal()" title="Somente Allan pode criar posts">+ Criar post</button>
+  </div>`;
+  if(!dates.length){ container.innerHTML = addBtnHtml + '<p style="color:#66758A;padding:20px 0;">Nenhum post encontrado com esses filtros.</p>'; updatePermissionUI(); return; }
+  container.innerHTML = addBtnHtml + dates.map(date => {
     const items = byDate[date];
     const cards = items.map(p => postCardHtml(p)).join('');
     return `<div class="date-group"><div class="date-head">${fmtDate(date)}</div><div class="post-grid">${cards}</div></div>`;
   }).join('');
+  updatePermissionUI();
 }
 
 function postCardHtml(p){
