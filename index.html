@@ -213,6 +213,9 @@
   .landing-toggle button{color:var(--navy);}
   .landing-toggle button.active{background:var(--gold); color:#fff;}
   .campaign-card{max-width:420px; margin:0 auto;}
+  .campaign-admin-btns{position:absolute; top:10px; right:10px; display:flex; gap:6px; z-index:2;}
+  .icon-btn{width:30px; height:30px; border-radius:8px; border:1px solid var(--border); background:#fff; font-size:14px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .15s ease;}
+  .icon-btn:hover{background:#f4f6f9;}
   .campaign-progress{height:6px; border-radius:4px; background:#eef1f5; overflow:hidden; margin:2px 0 4px;}
   .campaign-progress-bar{height:100%; border-radius:4px; transition:width .3s ease;}
   .kanban-card.campaign-bar{border-width:1px; border-style:solid;}
@@ -607,11 +610,18 @@ function computeCampaignProgress(campaignId){
 }
 
 function renderLandingList(){
+  const canCreateCampaign = isAllan();
   const cards = CAMPAIGNS.map(c => {
     const pct = computeCampaignProgress(c.id);
     const color = campaignColor(c.id);
+    const adminBtns = canCreateCampaign ? `
+      <div class="campaign-admin-btns" onclick="event.stopPropagation()">
+        <button type="button" class="icon-btn" title="Editar campanha" onclick="editCampaign('${c.id}')">✏️</button>
+        <button type="button" class="icon-btn" title="Deletar campanha" onclick="deleteCampaign('${c.id}')">🗑️</button>
+      </div>` : '';
     return `
-    <div class="post-card campaign-card" style="border-left:6px solid ${color};" onclick="enterCampaign('${c.id}')">
+    <div class="post-card campaign-card" style="border-left:6px solid ${color}; position:relative;" onclick="enterCampaign('${c.id}')">
+      ${adminBtns}
       <div class="seg" style="font-size:16px;">${c.title}</div>
       <div class="gancho">${c.subtitle||''}</div>
       <div class="campaign-progress" title="${pct}% dos posts publicados">
@@ -620,12 +630,73 @@ function renderLandingList(){
       <div class="foot"><span>${pct}% publicado</span><span>Abrir →</span></div>
     </div>`;
   }).join('');
-  const canCreateCampaign = isAllan();
-  document.getElementById('landingList').innerHTML = cards + `
-    <div class="post-card campaign-card" style="border-style:dashed; text-align:center; ${canCreateCampaign ? 'cursor:pointer;' : 'cursor:not-allowed;opacity:.5;'}" ${canCreateCampaign ? 'onclick="openNewCampaignModal()"' : 'title="Somente Allan pode criar campanhas"'}>
+  const newCampaignCard = canCreateCampaign ? `
+    <div class="post-card campaign-card" style="border-style:dashed; text-align:center; cursor:pointer;" onclick="openNewCampaignModal()">
       <div class="seg" style="font-size:16px;">+ Nova campanha</div>
-      <div class="gancho">${canCreateCampaign ? 'Criar uma nova campanha do zero' : 'Somente Allan pode criar campanhas'}</div>
-    </div>`;
+      <div class="gancho">Criar uma nova campanha do zero</div>
+    </div>` : '';
+  document.getElementById('landingList').innerHTML = cards + newCampaignCard;
+}
+
+function editCampaign(id){
+  requireLogin(() => {
+    if(!isAllan()){ alert('Somente Allan pode editar campanhas.'); return; }
+    const c = CAMPAIGNS.find(x => x.id === id);
+    if(!c) return;
+    openUtilModal(`
+      <h3>Editar campanha</h3>
+      <input type="text" id="ecTitle" value="${escapeHtml(c.title)}" placeholder="Nome da campanha" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:13px;">
+      <input type="text" id="ecSubtitle" value="${escapeHtml(c.subtitle||'')}" placeholder="Subtítulo (opcional)" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:13px;">
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <input type="date" id="ecStart" value="${c.dateStart||''}" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:13px;">
+        <input type="date" id="ecEnd" value="${c.dateEnd||''}" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:13px;">
+      </div>
+      <div class="login-error" id="ecError" aria-live="polite" style="text-align:left;">Digite um nome para a campanha.</div>
+      <div class="btn-row">
+        <button class="opt-cancel" onclick="closeUtilModal()">Cancelar</button>
+        <button class="opt-primary" onclick="submitEditCampaign('${id}')">Salvar alterações</button>
+      </div>
+    `);
+  });
+}
+
+async function submitEditCampaign(id){
+  if(!isAllan()){ alert('Somente Allan pode editar campanhas.'); return; }
+  const title = document.getElementById('ecTitle').value.trim();
+  if(!title){ document.getElementById('ecError').style.display = 'block'; return; }
+  const subtitle = document.getElementById('ecSubtitle').value.trim();
+  const dateStart = document.getElementById('ecStart').value || null;
+  const dateEnd = document.getElementById('ecEnd').value || null;
+  const { error } = await sb.from('campaigns').update({ title, subtitle, date_start: dateStart, date_end: dateEnd }).eq('id', id);
+  if(error){ console.warn(error); alert('Não foi possível salvar as alterações.'); return; }
+  closeUtilModal();
+  await loadCampaigns();
+  renderLandingList();
+  showToast('Campanha atualizada com sucesso.');
+}
+
+function deleteCampaign(id){
+  requireLogin(() => {
+    if(!isAllan()){ alert('Somente Allan pode deletar campanhas.'); return; }
+    const c = CAMPAIGNS.find(x => x.id === id);
+    if(!c) return;
+    const campPosts = posts.filter(p => p && p.__campaignId === id);
+    const warn = campPosts.length ? ` Isso também vai apagar os ${campPosts.length} posts dessa campanha.` : '';
+    if(!confirm(`Tem certeza que deseja deletar a campanha "${c.title}"?${warn} Essa ação não pode ser desfeita.`)) return;
+    (async () => {
+      if(campPosts.length){
+        const { error: delPostsErr } = await sb.from('posts').delete().eq('campaign_id', id);
+        if(delPostsErr){ console.warn(delPostsErr); alert('Não foi possível apagar os posts da campanha.'); return; }
+      }
+      const { error } = await sb.from('campaigns').delete().eq('id', id);
+      if(error){ console.warn(error); alert('Não foi possível deletar a campanha.'); return; }
+      await loadCampaigns();
+      await loadPostsFromSupabase();
+      await loadAllReviewData();
+      renderLandingList();
+      showToast('Campanha deletada.');
+    })();
+  });
 }
 
 function renderLandingKanban(){
@@ -863,7 +934,7 @@ function reviewDotSvg(isOn, color, size){
   const r = size/2 - 1.6;
   const cx = size/2, cy = size/2;
   if(isOn) return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}"></circle></svg>`;
-  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="3"></circle></svg>`;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="opacity:.4;"><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="3"></circle></svg>`;
 }
 
 // versão só de exibição (cards de Lista e Kanban) — não clicável
