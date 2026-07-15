@@ -251,7 +251,11 @@
   @media (min-width:761px){ .hamburger-btn{left:14px; right:auto;} }
   .sidebar-overlay{position:fixed; inset:0; background:rgba(4,20,50,.35); z-index:var(--z-sidebar-overlay); opacity:0; visibility:hidden; transition:opacity .22s ease, visibility 0s linear .22s;}
   .sidebar-overlay.open{opacity:1; visibility:visible; transition:opacity .22s ease, visibility 0s linear 0s;}
-  .sidebar{position:fixed; top:0; left:0; bottom:0; width:230px; background:#fff; box-shadow:2px 0 18px rgba(4,20,50,.18); z-index:var(--z-sidebar); padding:64px 14px 14px; display:flex; flex-direction:column; gap:8px; transform:translateX(-100%); transition:transform 1s cubic-bezier(.4,0,.2,1);}
+  .sidebar{position:fixed; top:0; left:0; bottom:0; width:230px; background:#fff; box-shadow:2px 0 18px rgba(4,20,50,.18); z-index:var(--z-sidebar); padding:64px 14px 14px; display:flex; flex-direction:column; gap:8px; transform:translateX(-100%); transition:transform 1s cubic-bezier(.4,0,.2,1) !important;}
+  /* essa animação é a navegação principal do site (não é decorativa), então mantemos ela
+     mesmo quando o sistema do usuário pede "reduzir movimento" — a regra global lá em cima
+     zera a duração de toda transição/animação com !important, então precisamos de uma
+     seletor mais específico (.sidebar) + !important pra vencer essa regra aqui. */
   .sidebar-hotzone{display:none; position:fixed; top:0; left:0; bottom:0; width:14px; z-index:var(--z-sidebar-overlay);}
   @media (min-width:761px){ .sidebar-hotzone{display:block;} }
   .sidebar.open{transform:translateX(0);}
