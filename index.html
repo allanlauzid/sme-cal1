@@ -19,6 +19,8 @@
   @media (prefers-reduced-motion: reduce){
     *, *::before, *::after{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important;}
   }
+  :focus-visible{outline:2px solid var(--gold); outline-offset:2px; border-radius:4px;}
+  [role="button"]{cursor:pointer;}
   @media (min-width:761px){ body{zoom:1.25;} }
   header{background:linear-gradient(135deg,var(--navy),var(--navy-deep)); color:#fff; padding:20px 24px; position:sticky; top:0; z-index:var(--z-header); box-shadow:0 4px 14px rgba(0,0,0,.18);}
   header h1{margin:0 0 4px; font-size:20px;}
@@ -44,6 +46,7 @@
   .util-modal .opt-primary{background:var(--navy); color:#fff;}
   .util-modal .opt-secondary{background:#eef1f5; color:var(--navy);}
   .util-modal .opt-cancel{background:transparent; color:var(--muted); font-weight:600;}
+  .util-modal .opt-danger{background:#c0392b; color:#fff;}
   .session-list{max-height:340px; overflow-y:auto; margin-top:4px;}
   .session-item{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:11px 12px; border:1px solid var(--border); border-radius:9px; margin-bottom:8px; cursor:pointer;}
   .session-item:hover{border-color:var(--gold); background:#fffaf0;}
@@ -224,9 +227,9 @@
   .landing-toggle button.active{background:var(--gold); color:#fff;}
   .campaign-card{max-width:420px; margin:0 auto;}
   .campaign-admin-btns{position:absolute; top:10px; right:10px; display:flex; gap:6px; z-index:2;}
-  .icon-btn{width:30px; height:30px; border-radius:8px; border:1px solid var(--border); background:#fff; font-size:14px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .15s ease;}
+  .icon-btn{width:40px; height:40px; border-radius:9px; border:1px solid var(--border); background:#fff; font-size:14px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .15s ease;}
   .icon-btn:hover{background:#f4f6f9;}
-  .icon-btn img{width:16px; height:16px;}
+  .icon-btn img{width:18px; height:18px;}
   .sidebar-icon{width:16px; height:16px; vertical-align:-3px; margin-right:2px;}
   .sidebar-btn:disabled{opacity:.4; cursor:not-allowed;}
   .campaign-progress{height:6px; border-radius:4px; background:#eef1f5; overflow:hidden; margin:2px 0 4px;}
@@ -314,8 +317,8 @@
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 <nav class="sidebar" id="sidebar" onmouseenter="sidebarHoverEnter()" onmouseleave="sidebarHoverLeave()">
   <div class="sidebar-head">Menu</div>
-  <button type="button" class="sidebar-btn" id="sbPerfil" onclick="handleProfileClick()">👤 <span id="sbPerfilLabel">Perfil</span></button>
-  <button type="button" class="sidebar-btn" onclick="backToLanding()">🗂 Campanhas</button>
+  <button type="button" class="sidebar-btn" id="sbPerfil" onclick="handleProfileClick()"><svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg> <span id="sbPerfilLabel">Perfil</span></button>
+  <button type="button" class="sidebar-btn" onclick="backToLanding()"><svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 015.25 3.75h4.5a2.25 2.25 0 011.591.659l1.75 1.75a2.25 2.25 0 001.591.659h3.068a2.25 2.25 0 012.25 2.25v.909"/></svg> Campanhas</button>
   <button type="button" class="sidebar-btn" id="btnSalvar" onclick="salvarTudo()"><img class="sidebar-icon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAFnUlEQVR4nO2bz2scZRjHP8/7zs60SVQQrVoqaC1pWsRLQEEPWxVRxKPppWnTIkWQghfxolJjPelJKIJFqG2iSOPJv6ALimANUvzR+AP04Ek8lZJmd973fTzMbpu2aXZnZ3aTbvqBJSHZed9nvvO+3+d9n5kRdk+MxDp0XMS+jPrNgOF6FEcUR+rqM42F0weoViNqNUf1aERt2iVjUx8SJW/glhwi0Q3H58NjKlZD+l3jwqknQQVEW30mY1OHieITuIZDiAAFkyLyY/BLh9PfvvgJjhqYDp10ZmIdOi42mUL98Ionv/4R8BWMfUJM/PXIjkP3wrTS4bkYgUl8PQDa2zh7iQiu7sTGDzUifxpQqlUDSLsjDWCbP9t+eV0jEuGWnESbXoh37X+rOUVtu8NuxSF/c0QsvuHEVI4lOw88TW3aMTGxqgiDJQAIBIOCGjM7vH1yC3NnQmaKKzNoAgBiCC6IqWxNY3MqyyBnbzrFB1AAmlOh3vSDA2+v5geDKQAs84PoWDI6+czN/GBwBbjqB6pRNDP82OQW5uZu8INBFoArfiCVrWlqm+uDa/1gwAXgqh/Y5Pl4bP871/vB4AsAV/3Axu8lu/Y9u9wPNoYAV/wgqEplZvjRV+5r+cFGEYDMD3wQqTyQ+nQGUKpsJAFY5gebn8vWB9Ou6N791iMTwYvY6WR06oeNNQIyBIKAGDUc34gCAGJQryI8UtIU0IDiAY8Wriv4ZmnGFw5rdQTQUgRQlSGJYos6i7StQbQhWGwMaeOuMmJrQ8ECZu1dD9No8J+qu/yNeOfVuELTSsSopg0xYv5r/qWnpbqCIyALLv1j9jxwvoR4+k4+AUSUFQsLR01zk1EetS0Kc732gXwCCBoDyqWdArVl/5kO1OioDt81l3YK7DHIX1GZ9dvOBBA1BKeKPMW2ic3Mn7hM00VLi6Qd8yfS7JepF9EAJanQ4bBt5k1TeTC5Y/jLZHTy4TI6z8XuibuTsYPvY6KXCI2AUDTdACDJrqkcV1EVEwu+sQj8jfQ8VzcRUfR+MfE9hPQmPtQdObOASKa+GcLY3WUF0VHPGiCkHsq58i26SINiQLV5JfqICCWfPHS/DpBmQLc8G3QzdJXbAqx1AGvNbQHWOoC15rYAax3AWtPlOkADiK6bp4oEmk+T5b6gXQigAbGmeOmrZNSD+pBXhJwCqGJioyH9hxAWsl7XA2IRxsTE2wgNzbNKzSGAhuzk/SeN1L3Jn59f7CbUnrFj351xxXwgJn6V0Oh4JHS4HdaARAb1v9cvnBoDFCYs7Fb4dY33BK0Y5jzZ+SwgdhR1HYnQ2QhQCVhr1LlzgDI+XmF+Li0YebmMj1eYn09V9ZxYO4rzAWmf5fKaYACEkZHrRs1RQ7XPKbVGuOZ54CwmgXy1yW7S4ApTpg9F0c7InZgL3hfInsreNHaoGqx9HF/3SP5cnAvVgE2s8f77pYWTtTxPhq9EMQGqGGqEIGGvRCOvAd2sRfKhAaLNhHDxY6DWiqHb5kq5Nyiql3BLDt9wZbW5Cg4kEtVLZTRWUrBirrwoUfyFidVRbfZRzlAr8/a4A1wf9gfNPrQU0y3p9jjDEiUR+KgPHhARJahbGi6juYK3xzPzUZGTJl08h6a+99ViVdJFG0R+Xh5DtxQcAVn6SRdOzacwX6ytYjF0S0ke0FoJni2nubbsuXEl2CUlCdDvlWCt/Vc6pMyU1e9dYSn5pkwB1kuBLBfFBJg4Y5nb6+NdB18XU9mPrzukx7UyVY9NIg3pTOPCZx+1Yui2uWIC/PuLAIiG7djKOOr6sxewFcTXv10eQ7eUNQXqhDQQvENC70dASCOgXkZzEdkTmbLs0wXSKkm33kTtJZr1VWjBpa2PUZjFJrf+q7P5EGxiFGajhiweiT2s+vr8YBEQe1l9/auGLB75H+tMKbi3JOSUAAAAAElFTkSuQmCC" alt=""> Salvar</button>
   <div class="sidebar-offline" id="offlineWrap">
     <button type="button" class="sidebar-btn" id="btnOffline" onclick="toggleOfflineMenu()"><img class="sidebar-icon" src="data:image/png;base64,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" alt=""> Offline ▾</button>
@@ -324,7 +327,7 @@
       <button onclick="doImportTxt()">Importar (.txt)</button>
     </div>
   </div>
-  <button type="button" class="sidebar-btn" id="btnNovo" onclick="confirmNovo()">↺ Novo</button>
+  <button type="button" class="sidebar-btn" id="btnNovo" onclick="confirmNovo()"><svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg> Novo</button>
   <button type="button" class="sidebar-btn" id="btnFiltros" onclick="toggleFiltersPanel()"><img class="sidebar-icon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAQ00lEQVR4nN2bf5CdZXXHP+d53h93s2ER0AQURSGE3QVFiUXaam+slmFsVRi8ikB2E3QYZaxabaeOM7Is0xl/jMWhip3iCNndIOjO4I9qHTq2soMiYqltlN1NjBH8ARoYhZLs3vu+7/Oc/vG8d+/d3ZvkbrKJg2dm5959fzzPc77nPOec55xzhSOmEUP1XsPUVNG80nveO9bnzm0SeA3oucAGhXWi2oNQATJU5lTkd6B7wewywv1q+X7jR7fvbY1ds+Fz0h35+rojOaJ3ajXDZFhc73lXrC+Kyhsxcqmqv1DEPA+xgIIq4EEJ/zenEwEx5f8KvnhGMTsR+Vd8/uVsdmJ3eHDEhM9RfzRMHpqZFVHNNqWS9G/ZiER/LcLbMfEpqIIWoF5RPKISxpel82j5oSAKKmAMJgqguCwDviYiN9enb/9OmLZmm4CvNnULQEvqg7WTU+39MJh3YaNefAZeXTlSU6wrpaAuikckwibgHaCTKsVI9vDETBhXCaCtHnWxWG1KUZP+bZdh+JSY+AxcA1QLROxhxtHFe2CZRix/PmiQwaSCdwcUvTGbuf0T4XZLC1eDDgPAiAn7r2bT/rX/iLXvQz344hCMq0fFA4JgQAQpdwNKyzbgUNXyGdNxelWHGBs0ovim5Zlr5qYnfw3VCFrG92joEACUzL/oypOS3vQuscnFuLorNWLpglv7XiKDKY24L8D7AwoHgDpoIiJrQPoW9ry68JxSIHQCVVF1RGmk3u3Vorgs3z2+k2o1avdAqwxAYL73zKvXFZX4m5j4Aop6jki87FHFIVhMAnjUFXsQ7jVq7itUpmN4bN419pNHGb1zUW89XZNF5lQROVuM/DFQReSVmAh83rQndvk8WmDjCO9/67T+V8Xsnd9bDRA6ADBiYFQ5f/jENJf/xMSvoGgUiERLVwQoJjF45xDuxuvnGvN6H4+O1VeyiLh/eJMxMqQqW8RGJ+EyQP0yTVN1mMgCT3nN/zyfmfjh0dqEpQAEaw8kP+q5R6LK6yjqy5lX9RhjkAi8+4ZXvT6f3f7fC/er1fD81GYPN+jyaUaE2rSwb5+0S7Dnpe883RXFh0Tk3SAGX7jS1iwBIbaK/5XN3avmfzL+q5atOloASpVK+4duJup5L8X8crUvFwD+aUHfV5/ePhZuLERvngVf3y0tjiorA1tfo8it2Ki/o/apFkRppK5xf7buJVXWTSuTRzLvIgCCKiWDQ28SSb+KywqE5RPbJMK7WZXs8mz6junw3qCuTrSmQnWzZWqq4MzaiWnaO45N3nQQLcyJemLyuY82dk18+EiDJWl9jgjnP9KXZDwsYk9DC120B1UdNrFo8V9RvfjLA3t37KM6EjE1uiruaBG1mJFkYPh2selwBxAUxCFivPcX5rNjDx2JPTDlhAZGfVrXj4hNn48v3BLmPSa2+GJ3nB14Q2C+emyYBwLzIwZGJJsZ24pr3E2URijtzAmqglgj6M2ABE1cGUnT6qcbr34xNp4GTYKvX9COMmaXOfXZK7Ndd+w6lrH5YioPQ2c8kqRr5PsY+zJc7pF24eCwiVWfXZbNjH1lpWszVDGAqrUfwMYV1IcorjWBx8RGKK7Ldt2xi+pIdHyYBxj11KaFR8fqHn8l6udLxWxJWgC8iuqHAWFyZVoQGO3fckoi5qci0leGqeG64rCxVZfdk82OX7Ja0deKqbQ1Sf/QiESVGyjqS9yjBiF592f1me33rUQLDEAq5lJj0xPx6miXviCoKxT/t4AwtW5VT2Jd09SogxGTPeeUT2jReBQTmRAolaTiEaNeddtKhy71Sd+i6tsyFoTY3CYGdV/LZ3f8OBjK46X6y0ip3mt44FPz4P8JE0l54AokWHwhoG9g8Lq1TQ/SzcBm7YZtzxPlQtSVp7fmoGpQDyb6TLeDHVOamnKAZL4YxzX+DyMRLVsgqPNi4/WpO/DKcKnW+YS5hEwW+Qsx9mTUtWmAeiQy6oqfNvSZ7wLNSOv3SUqtZth955Mo/46JWeQWFY9YVaOvBqA62J0GiPCakMOTxXvKRCD8B9OTWRnbL93/x18r9u0L7tnwjeU3RVAvovInAEzRlcAMMNghhBZQDHpfh3da8UGttvzYeixparMHVDEP4vLFx2ZRCQdIPXMlhyOD6tnlybZt/2PwBU7NdNvETSrRarqaka722urQqAJkPfEjqv4JxEjLG4iAB+TUtS//+SnlC4fVUgOsK19sXlMQwfsDsdHHwqUbtGRUKgNXnpEMbv1eOnjCdNo/9M5mymwVuTwUBTv10K1zIvLLMrXeUt8Qw/Rl89nJ4cJIVwBUSpm2+X9B0f1zzh6geat6b4gYid5rojUXgd9I1PO5pH/LB4J7PF4gBKZUeWqJgKVcu6iNerodzYSKTbsN0DKBIQ3qLl+43AyCVAbUZR6vGa5RiIk+GQ9seUXIAxwPEKZDWll0fiFT3rZ4MKj3Pe3PHooMkC1HUkGIOdEdjCED2DJOEIOMAkptxdwcAQ2WOXZJO+c/FMFk7c8eigxKM39XPizlIPRSX9NSpeq+oHro4wsHEhGLyxXMX1TO2vrC42MUR5uVpb5SUE0K9kE9Yv1ct6MZFfltyNsvkARjIifEZu7UcGlEYHPz7s7WfEhIlMQVjfzrASltxbGiIJ0Nl6SoPL/0XrLotuqcLeKnux3QoOwNEtV2dXGYSARzNhAMYBlYaOHvxefadhqT0my8BVA2bz6GEWMwgOma5z5f4NTgAZvSU0UMKvLr+bXRE+HaaBdbQHRXafTa3YkiBqGMqsJgHkZM/pMdO/H+B5gIKGsCPleMvTgeGDqX0VE9ZsYwaJdow16ATRK0/fQqWgry5zx0a15uxcMDoMp3l6mSYFAH6OtApTyILLhCET6DWEFLrVE8JoqM8g+ANu3FqtO6dWUtgotLwbcJDUWMivKDsFa6OwxZie7H53Ng2hATgy8UY8+PNw6/NFyrhWwtI6a+7sV3UtT/F5tEC5WhInPY5NLknKG3MDVVsOna5VWkoyNhctJx2rVrgDfi83Bibd0V1IuqCeH7uumuchemPnPbz1XYWap024EIh4mNGN7JIhc3LUyNFoK+G/V+QRKCQQsvNvpcsnG4n4duzRcKJKtB1aoFiPvmLxWTnIb37YnbYJN89kzm5AGAbk+vQeoqXxUxLKg0hCSDy1TEDPee9471TH7Jh3016ajVbH124nvq87/DphYlpMm8B5HnYOUblYErz2BqqqA6sjoghEBMjJEPgl/acuEwsaLybfbc/kR5SOtOAwDEuy+qy7LSsrclGdRjk768yG8A0YV9NTnpqFajbHbiJtz8x4gqMYhHAJd7MfZML+m3441DL2NqtCg14cjtQrUawaSL+4e2YNMLcIWDRQXU0opLqFLt694GSTOBmA4M341NLqNYVBHSwJjBePfq+dmxBxYVH8p3k/6hvxcbfwzV0DsAYOII/NPe+3fls2N3tT+/Mu5DYHVC/96TGmJ/LCLrgoFuqr96JBLV4mdZfuIgez6dtdZ+eDJMhi8O83G8C8akHSC8ANaJTHDONSeEmH+kpQnUbDY7/nHILlHVn0pUiTAmwucZqn3GxncmA1tv633JFevbIsXuW3OqGBj1GfJ5sfGpeLekYoViIhGVm9jz6UZpK7pO3i7s6WLm9u+j+ZdD+UvbpBSqtGLjDalxX2hdb4a84f3GwxP3ZI39m9TlH1WV3xJVEsQIPvNiom15z5oH4sGtV5aJisUJ2IMxv+naiKnRIh0YupEofXNZKF2SDo+MFvW9jf1zt8GIWXDZXZK0mBnVdPDqs9B4J5CAXywp1YKoEqnLxrOZ7cPhYnstrvW95+yhF7jYDInyNoTzkQgxEYjFF3P3GdGr6g9v/2Vz5OXLGjHUpqXcXn8jUXoTLitgabGWgiiJ1JVVoSOoW7QYbO7nc7Z8UOI1n6SYP0hZuhLh8rsbTz2xhce/PlcWLRxNqbb1EALEg8MvN2ovUvx5AusxNvF5/pF89/jOjqmrNibSga03YuKP4DPH0g605lqK+mRjdvytS3jqegss3u/l4pOB4XvEJhcfqjaPL37o8dfk02P/07bwEoi2Mne36whze0B7z7tifeF6bsFGl+OypRa/LNZGRlV/kbj6Bft33/lkevaVZzb61v4ihMHdg7B0HxpA127Y9tws0QdF7ItD8rFDl4aNLernFf145sxN7LrtmXCzZqnuk1Z3yFvNQop6alpb94BambBoaYykg9u2KnqjmPh0iqxDv5B6MGBMIUX22vquHfczeN3aROdmRfU7jdmxKxbafLoA4WA9Qj7uv/o8I/EUIid3bFUJCzHYBHXZXuCfrTdfmN9122PL5xiRkJ0Z1I4L23BVXyWO3qyY92CjC8vusoMwL2Ai4312RT4z8UWAtH/4Lmz8NkRQl2/PZrZv6xaEg1jiYNB6+q+6yJv030BOwucdGqXQUh0txoLLnwL9Fsg3vZoHc1N5hOnP7l82/Om1nrSv7wVe3SZBXw9yiZjodFBwhQsxvixZm3owgrGCz97RmJm4DSDpH75eonSUoh62W9QTqauPZTNjW7sB4eCuqDRG8cCWVwjxV8TaF3XuFisXp6IYsUgcRnUZCo8LPKaqT4lQV5VUoE/hNIFTsUmMQEviHXsQg90xUQQ0vM+25rM77gJI+7dch63cgm/zEKrFSkA4tC8uPUPlrLe90Ke9E2KiKq5RNkV26OWjbJgMI1uk2QTaoVNUXbO0paXEOxxfS2Cj1KrPf+aLYqjYPfGdwPzW67DRLaGbRZd6iJyoJ1ZXH89mxoYPBUIXEVnTv9dsOtg7CuZDiLHBOB5EYk0wFnqERdtOGITcw0L/bKdXfTPHgFjQ4q5ofv79B352128AKv3brldrR/F5s6CxfJwFEBpl3NIZhC5D0tbLPQPbXuXgo2LsawHwmaLiELXL9+2KqKU9xlpMBC6fVdHrs+ntIWA/f/g5SSafFRu/vXSPhw6ruwBhJQteFOQk5w5fjrfvF8OrEVv2+7ogOURK7WjrQmtjtFxd0IyyYVqMQeJw27tZRD7b+N2+z/P41+eo1WyyM9mAib8lJj69YwvfIUGoxFpkE9ns9qGlIByBxBYPkJ47vFnVXIXqJWLs6UFlfVmy8+251rZNUO6c5l/oQP8dwr0q5o6s0ft19ny6AZTGeLNnw561aRz/Cza+4uDG+DAg+Gwim14MwlGobM0u6go955oT0shtUs+fCnIR6FmonobQB8YEZWgaQA6o8GvgUcE+qKrfjSPzgwM//vxvWsPXbFv350JklwwMbxdbGe4YqncFQmNHNj22pQnCKiQva5YadDjnCxuvPSWx2UlqijWRsz0FRSY+motM+vRcL0+WYWsbLRyCOrW9lgHVqG8DoXMH+8GoCYKr35HNjF9NrWZXM3srUAth79S0dtdPVPYIr1unIeV22J/DtIGwdUxsOnQkIEi8JvbF3C3ZzPh7jmWXR/OoXX42Q2Fo6yA/kq6zowcBCkwcqc8v+/03Px0ZtUDo3zouUbplZSCox8SiPr//2QoAHDUIAqoHjmN7y6pTebIcMdns9iH1jQmiSoxqfvhXy9fR5NkMALSDML19SH3WLQiKGFXk8Wc7ALAMhMaOw4IQfnskYvjSs9kGLKV277BDospV5PNLD2ytn+C5xiOJq/zRH4IGNKmlCTPbr9Zi7hZsZJHYtCroRkI+0+1W9W/cv/vWJ/+QNKBJZeeUaHLu8OWofY+ovwA0VcwvRPhKnO3/xP49k0/AiPl/HL+/hrEJYLsAAAAASUVORK5CYII=" alt=""> Filtros</button>
   <input type="file" id="importFile" accept=".txt" style="display:none" onchange="importSuggestions(event)">
 </nav>
@@ -545,7 +548,7 @@ function renderKanban(){
     const stage = i+1;
     const cards = (byStage[stage]||[]).map(idx => {
       const p = posts[idx];
-      return `<div class="kanban-card" draggable="true" ondragstart="kbDragStart(event, ${idx})" onclick="openPost(${idx})">
+      return `<div class="kanban-card" draggable="true" ${CARD_KBD} ondragstart="kbDragStart(event, ${idx})" onclick="openPost(${idx})">
         <div class="tag-with-dots">
           <span class="tag ${p['Formato']}">${p['Formato']}</span>
           ${reviewDotsHtml(idx, 24)}
@@ -649,7 +652,7 @@ function renderLandingList(){
         <button type="button" class="icon-btn" title="Deletar campanha" onclick="deleteCampaign('${c.id}')"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAALuElEQVR4nOWbS4wdx3WGv7+q+w7JMTUgReqBwCKsxLE5DugEFpBFBJPLIEBei1kYICzZTrTLwssASRgli8QrB/DCgJw4ocyFgckiDyBINgJHiALEjqJIkYZOrMiRLTuShhzOcB7kvberThbVfacv72O6L2cIGf4JAmTdqtP/OX2q6vzV3eJQccnBs7Fz9ulfQe6LsvgE2AKgCQMMtGly/4bFL/eu/dU/VDYOi+EkIgeARDw/+9k/ci7/fQBiARD2GehxWeoe+3/cv/b8HxxmEA4nAEtLnuXlMHf2qS8oO/rnVtwJWDScz5CfPtYCxFAgJ2VHvBW3f6t77fJfVDYPmuphBCDZXFya79jR/5b8w8Rg+Nxb6P8A+C6SMLPhUYO2j8rnHyb0A87LLLzX0+2fZXV5p+w5PO4ekR2ksYQlB8thLhx7gix7lNAv8HlmFl7s9W7/Gm8tb04d/vjSQueI+zv5/NOEfiGfPzpX6IkuXIUlDwebBU0DIM6f93ChQdf/zeCS9N7bZ0zOEAXymUL/G7y1fItzF+cpun0AelspWzrH013N5nJeu3JLH//sN8g6n0b9Ajkv6QznL2WV7f05XIWVlUCDbGkQgHIBWlkpYGX/7lAA6GNP7xoIZGA48xuA8dqVnSljewDO/EbESGORjF1Wni0q282x/+K5TzRNIHtgcelkjwd+NcbiDEgw2aYJJyMKfh6X/QYxFDifEcPfGvZK9fv0sfoFnP/1vbHF3xj8x7SxCQ4wcy57u8Otv7+1urxe+TBDAFL0srOf+0UnLctlH26zYpqFatsruWVovx3gAMZCynuLxQ+i2VJx7S//dVomTPIptX/s8x/qqHhd2dxjFL0emGvMQhJQZx1GVv7DGJsMRLJOx4ru93uW/Rz/9fXt8ocRG+MdWlpygHVc8aR85zGKboHoIGWN/w47AODvy1gpQ3QouoV857GOK54ErPRpBOMD8P77SnHUw0h2qAXjoUEgmaIeBgY+3Y19dgE50opnHHABch9gQCx9mIjxAXjoIQMwZ+uS90ge/bhlgeXIY663Dgx8uhvTvBJnnpqbO8rXzLlflkVhE6bMBw0impwpxn/s3ua3eftylwkZ3Oy2Pv7MAvPewfQq9oODBdgJkbeeu2fCSnvojysuOQ5oBddBGbpPaMy3oRhKdfmRs58/Y3I/TegZ3n2wAhKi4TuSxf+5c+3rb5cl8L7DmgXg/AXPCkW08JvKj3w57S4fLP/xDrIOsbfzReDPKs77DWt3HuDsHUIvphMbGz/WCKUCdGjariFLfQHh0x2bACOCIphS33F9VBB6Gc7eae5Q0wCspD1UuPXkmGXjCwwzfJ4jn8SMFTY1VbJOcib0mHJOargsw2XlcVl/vE1ZBuYSxz3O+6HhCr9oABFbxwITnXe5LBQvEm5/CQuv43LBiIgpS2t1reh91YreV0HdMgA2ziYxvEHofslC8eIEm4mThcSxxnk/tJoCLrCBrIfUKUmodCngc28xvNT7zuXzAHzyqT/t9MJ/Sv6nsFAvSSMu84T+7/S+c/lrAHMff+oVfP4csR8ZCCEz5LEY3unN8SSvXt4A6Jx9+p/l8l8iFKE2HVJWROs5Y6OVT826PWsAXZ/dAtsezcBEVhb/BYBzF+d59fKGsG/jMmGqtLgBntiHwl7g/PmM8+czCnuB2Kd0Pt05U8BlEvZtXr28wbmL80C6hjwjWSABtp047nE+oABUuLVtsJVufJ2AAMOkhwCxe6IAZKb1SZbMKWdlpWBlpTCnfGK/ZGPPpvRQuS0P9QKRuN3aHm9pPJoGIDm7utwT3ByzBinNbDvF3jw2iTWVwRmBvI39d+2SQkisDdnETpX/GyYhIbjJ6nJviPM+aJEBqSQ2WC8XsZoDABFDJwHovJvUpIW1e9HQVtoYsolOpjqk3lNVBqzXuTZB8wAsraZDEriBBFaPsAkzhJ0AxGra3x26PpquTZEyJ9mA0qaEnUizr1Y3GFZmwI061yZoHoDyRMWktTEOlRHRAucuHqseXkS56+X0bB8BIcySDQCWA+cuHjO0UGa37h6QuDHx9GccWkyBCwAYca3a++oXB0PG8WOFP161RoobqW6Y6Ryh3NeLG1XDscIfl3F8zCJYMohrda7NLtIYV9MAc2vj1qB0p+1YEYqFgXHTzVQDTFoJJyJ5aCE6082qsQjFArJjo3WQsJJbnWsTtL4zUbpeEqhHIFVnypxXdqJqzLPOJrAzk3BKY3ZKGwB4ZSdQ5oaKsOr6ZolbSzQPQFlbO+x6WoXvFi+KyBHgwaphZ85v1eqGFrTKBICtnTm/RelsgAdTQanhhxwyQSy50VgHJH8ao9IDcR2LjAiSciV2xFNAerbw8nO3hTbLy7SMgENok5efu12d6TviqdEdiMTFYuJW49oEraeAC7ZBDP2q9qxzFiJKpwF4g7JetbJwmvx8bhQyJAy7CVhpiyidHlNYlTog9F2wjdb+NO+aauuO0y3QGD0woJ4C0Htkr25Iu2RzlEvMYF+vbFW2Ry4qQNuJ2x7XJmidAVvuTn1eD+kBS/PgVL2/mV0faMbmsLSs2vW7Gk/ZFB2w5e5stXSnVQD29IDYmKgHZKeHGzVZD0y5lNKftSFbstMTdYDYaKsDoHUGVHrAJugBw6pdoKrd5dZGzDTEYOxAB/Dg4Dxl78JlBlhrHQBtAzDQA7o+UQ+Ykh74RKkHLKyNpu1+SNPJVULoE6UOME3RAWUN0EIHQNsAVHrA7Pp4PRAx2QKfeuYoy8sRIDKDHqh0AKUOWF6OfOqZoyZbKN9OGdUB1XrRQgdA6ylwAUipOVEPwPH5bjhe/egGdUOLlyswh8U0tmyY74bjYooOGEy1C608mumxl4thsh6A+X4ID1RN0fJ1LEw/HR6BhAWLlg9OlEqb8xN1QAwzrTUtA3C1pOfWxkjSMgW8i4oDPZD5sImxO1I3TUQZK2M382GgA6LiCeQdoykgsJLTHsemaBeAssY2dAMbpweIyONsoAfYzcKWYVvjj73HolrVt3azMNjXnfFg+ZrtqA6wmDjVODbFTFMgwo3pesDKYmjJ89qVXYnNkW1zItK2JrHJa1d209uhJJtTdQA3xlnbDy0DkESGy7VBjAUjMi9lZzSfiqHFSg+UB6kN73/SASQdsFjqAPOnx6jK8oKxcLk26hybomUAUo2dd++UzwdGhwuQygwY0gONFWGpBO/SAbJTY1dROcC2E6c9jk0x0xTYjqem6AEw4lA5bOh6yyUgjRlqjadHd549HbAdT7XWAdA+AInDm1/pKh2PB9IHENXfiFkQ7mR9kMzexxQQRa3v3UjtosAUZPb+kA3cyfQKKXH4mgqCdd78SneIY0PMkAGVHlAX3/G4PMflHpd7fNbBZR7jI0BND2hTPvcoOzLoG2vzJ8oN2pUdkc+9SZt1GxgfwWXlNcq+Ls/xHW+oW+fWBjN/LyDZP1kstglFrFV5lup0+x6QavhVAL0SY+8FrAjEtKi56AaPsFwM2zHEF5JhgsWeB71St2HYvxO7NwlFrQ5QBOcke2lWP37iMcsjmxJLnp95JKPzrg19+NDbEp3jxunFvYJl+//E5vfd4HeAhcciH3rUhn6v26j/DrC26ga2h673iHjz3eKgvyT5iUH7DLiE41liZ/Fzizi/RNE3pr3fc6iQkeWy0Pvr/rXn36i4tbHQfhFcXRIsQywed9mxPyQT9zST7gkGrkMsui8Dbwy4tUD7ACwvloLI/8j6OwUWZ338exAw1Jfhf1Tn1gYzbIPl8Xh254dF0ekhd3T809pDR1kyxtudrPfDfo1bG8xSChtccjuvf/M9Ey/hc5UV2v2FWcDnMvHSzuvffK8sgu5LAIB08BjF7xEDOJ+RXnpsTWAGpBcs05foiUONU1vMGIDlAJdcsfr8t2IMn0FuC5/7dsdes0LC5x65rRjDZ4rV57+V7v5sdcA9Ek6fsuYfvfhJl+e/a2YXRDzNPp+pzA6LhluTdDX2+3/S/+6VV+/1c9r/B8r8xxmOykm2AAAAAElFTkSuQmCC" alt="Deletar"></button>
       </div>` : '';
     return `
-    <div class="post-card campaign-card" style="border-left:6px solid ${color}; position:relative;" onclick="enterCampaign('${c.id}')">
+    <div class="post-card campaign-card" style="border-left:6px solid ${color}; position:relative;" ${CARD_KBD} onclick="enterCampaign('${c.id}')">
       ${adminBtns}
       <div class="seg" style="font-size:16px;">${c.title}</div>
       <div class="gancho">${c.subtitle||''}</div>
@@ -660,7 +663,7 @@ function renderLandingList(){
     </div>`;
   }).join('');
   const newCampaignCard = canCreateCampaign ? `
-    <div class="post-card campaign-card" style="border-style:dashed; text-align:center; cursor:pointer;" onclick="openNewCampaignModal()">
+    <div class="post-card campaign-card" style="border-style:dashed; text-align:center; cursor:pointer;" ${CARD_KBD} onclick="openNewCampaignModal()">
       <div class="seg" style="font-size:16px;">+ Nova campanha</div>
       <div class="gancho">Criar uma nova campanha do zero</div>
     </div>` : '';
@@ -711,21 +714,32 @@ function deleteCampaign(id){
     if(!c) return;
     const campPosts = posts.filter(p => p && p.__campaignId === id);
     const warn = campPosts.length ? ` Isso também vai apagar os ${campPosts.length} posts dessa campanha.` : '';
-    if(!confirm(`Tem certeza que deseja deletar a campanha "${c.title}"?${warn} Essa ação não pode ser desfeita.`)) return;
-    (async () => {
-      if(campPosts.length){
-        const { error: delPostsErr } = await sb.from('posts').delete().eq('campaign_id', id);
-        if(delPostsErr){ console.warn(delPostsErr); alert('Não foi possível apagar os posts da campanha.'); return; }
-      }
-      const { error } = await sb.from('campaigns').delete().eq('id', id);
-      if(error){ console.warn(error); alert('Não foi possível deletar a campanha.'); return; }
-      await loadCampaigns();
-      await loadPostsFromSupabase();
-      await loadAllReviewData();
-      renderLandingList();
-      showToast('Campanha deletada.');
-    })();
+    openUtilModal(`
+      <h3>Deletar campanha</h3>
+      <p style="font-size:13px;color:var(--muted-text);margin-bottom:16px;">Tem certeza que deseja deletar a campanha "${escapeHtml(c.title)}"?${warn} Essa ação não pode ser desfeita.</p>
+      <div class="btn-row">
+        <button class="opt-cancel" onclick="closeUtilModal()">Cancelar</button>
+        <button class="opt-danger" onclick="confirmDeleteCampaign('${id}')">Deletar campanha</button>
+      </div>
+    `);
   });
+}
+
+async function confirmDeleteCampaign(id){
+  if(!isAllan()){ alert('Somente Allan pode deletar campanhas.'); return; }
+  const campPosts = posts.filter(p => p && p.__campaignId === id);
+  if(campPosts.length){
+    const { error: delPostsErr } = await sb.from('posts').delete().eq('campaign_id', id);
+    if(delPostsErr){ console.warn(delPostsErr); alert('Não foi possível apagar os posts da campanha.'); return; }
+  }
+  const { error } = await sb.from('campaigns').delete().eq('id', id);
+  if(error){ console.warn(error); alert('Não foi possível deletar a campanha.'); return; }
+  closeUtilModal();
+  await loadCampaigns();
+  await loadPostsFromSupabase();
+  await loadAllReviewData();
+  renderLandingList();
+  showToast('Campanha deletada.');
 }
 
 function renderLandingKanban(){
@@ -734,7 +748,7 @@ function renderLandingKanban(){
     const cardsForStage = CAMPAIGNS.filter(c => computeCampaignStage(c.id) === stage);
     const cards = cardsForStage.map(c => {
       const color = campaignColor(c.id);
-      return `<div class="kanban-card campaign-bar" style="background:${color}; border-color:${color};" onclick="enterCampaign('${c.id}')"><div class="kc-seg" style="color:#fff;">${c.title}</div></div>`;
+      return `<div class="kanban-card campaign-bar" style="background:${color}; border-color:${color};" ${CARD_KBD} onclick="enterCampaign('${c.id}')"><div class="kc-seg" style="color:#fff;">${c.title}</div></div>`;
     }).join('');
     return `<div class="kanban-col"><div class="kanban-col-head"><span>${stage}. ${label}</span></div><div class="kanban-col-body">${cards || '<div class="kc-empty">—</div>'}</div></div>`;
   }).join('');
@@ -757,7 +771,7 @@ function renderLandingCal(){
       const iso = `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
       const covering = campaignsOnDate(iso);
       const bars = covering.map(c => `<div class="landing-cal-bar" style="background:${campaignColor(c.id)};" title="${c.title}"></div>`).join('');
-      cells += `<div class="cal-day ${covering.length?'has-posts':''}" ${covering.length?`onclick="enterCampaign('${covering[0].id}')"`:''}>
+      cells += `<div class="cal-day ${covering.length?'has-posts':''}" ${covering.length?`${CARD_KBD} onclick="enterCampaign('${covering[0].id}')"`:''}>
         <div class="num">${d}</div>
         <div class="landing-cal-bars">${bars}</div>
       </div>`;
@@ -1274,6 +1288,10 @@ function logoutUser(){
 
 function escapeHtml(s){ const d = document.createElement('div'); d.innerText = s == null ? '' : s; return d.innerHTML; }
 
+// atributos pra tornar cards clicáveis (<div onclick=...>) navegáveis por teclado:
+// foco por Tab (tabindex), papel semântico (role="button") e ativação por Enter/Espaço.
+const CARD_KBD = `tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"`;
+
 const MAIN_FIELDS = [
   ['pub','Público-alvo'], ['dor','Dor / Intenção'], ['gancho','Gancho'],
   ['objetivo','Objetivo do post'], ['estrutura','Estrutura'], ['textoArte','Texto da arte'],
@@ -1426,7 +1444,7 @@ function postCardHtml(p){
   const letter = pubLabel[p['Público-alvo']];
   const idx = posts.indexOf(p);
   const stage = p.__kanban || 2;
-  return `<div class="post-card" onclick="openPost(${idx})">
+  return `<div class="post-card" ${CARD_KBD} onclick="openPost(${idx})">
     <div class="row1">
       <div class="tag-with-dots">
         <span class="tag ${p['Formato']}">${p['Formato']}</span>
@@ -1465,7 +1483,7 @@ function renderCalendar(){
       const dayPosts = byDate[iso] || [];
       const hasPosts = dayPosts.length>0;
       const dots = dayPosts.slice(0,6).map(p=>`<span class="cal-dot ${p['Formato']}" title="${p['Formato']}"></span>`).join('');
-      cells += `<div class="cal-day ${hasPosts?'has-posts':''}" ${hasPosts?`onclick="openDay('${iso}')"`:''}>
+      cells += `<div class="cal-day ${hasPosts?'has-posts':''}" ${hasPosts?`${CARD_KBD} onclick="openDay('${iso}')"`:''}>
         <div class="num">${d}</div>
         <div class="dots">${dots}</div>
       </div>`;
@@ -1481,7 +1499,7 @@ function renderCalendar(){
   document.getElementById('agendaView').innerHTML = dates.map(date => {
     const items = byDate[date];
     const tags = items.map(p=>`<span class="tag ${p['Formato']}">${p['Formato']}</span>`).join('');
-    return `<div class="agenda-day" onclick="openDay('${date}')"><div class="d">${fmtDate(date)} · ${items.length} post(s)</div><div class="items">${tags}</div></div>`;
+    return `<div class="agenda-day" ${CARD_KBD} onclick="openDay('${date}')"><div class="d">${fmtDate(date)} · ${items.length} post(s)</div><div class="items">${tags}</div></div>`;
   }).join('');
 }
 
@@ -1494,7 +1512,7 @@ function openDay(iso){
     <p style="font-size:12.5px;color:#66758A;margin-bottom:16px;">${list.length} posts nesta data. Clique para ver o conteúdo completo.</p>
     ${list.map(p => {
       const idx = posts.indexOf(p);
-      return `<div class="daylist-item" onclick="openPost(${idx})">
+      return `<div class="daylist-item" ${CARD_KBD} onclick="openPost(${idx})">
         <div><span class="tag ${p['Formato']}">${p['Formato']}</span> &nbsp; <b>${p['Segmento/Página']}</b></div>
         <span style="color:#66758A;font-size:12px;">Ver →</span>
       </div>`;
