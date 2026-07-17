@@ -280,6 +280,9 @@
 
   /* Catraca de etapa do Kanban dentro do modal */
   .stage-ratchet-wrap{display:flex; align-items:center; gap:6px;}
+  .copy-link-pill{display:inline-flex; align-items:center; gap:7px; background:transparent; border:1px solid var(--navy); color:var(--navy); font-size:12px; font-weight:600; padding:7px 14px; border-radius:999px; cursor:pointer; transition:background .15s ease;}
+  .copy-link-pill:hover{background:#eef1f5;}
+  .copy-link-icon{width:15px; height:15px; display:block;}
   .stage-ratchet{display:flex; align-items:center; gap:4px; background:#f4f6f9; border-radius:20px; padding:3px 4px;}
   .sr-arrow{border:none; background:#fff; width:34px; height:34px; border-radius:50%; font-size:14px; color:var(--navy); cursor:pointer; box-shadow:0 1px 2px rgba(4,20,50,.12);}
   .sr-arrow:disabled{opacity:.35; cursor:default;}
@@ -1629,6 +1632,50 @@ async function openPost(idx){
   renderPostModal();
 }
 
+// gera um link direto pro card (ex.: https://site/#post=42&campanha=<uuid>) e copia
+// pra área de transferência — ao abrir esse link, o site entra direto na campanha
+// certa e já abre o macro desse post (ver checkDeepLink(), chamado no início).
+function copyPostLink(idx){
+  const p = posts[idx];
+  if(!p) return;
+  const url = `${location.origin}${location.pathname}#post=${p.__id}&campanha=${p.__campaignId}`;
+  const done = () => showToast('Link do card copiado!');
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(done).catch(() => {
+      window.prompt('Copie o link abaixo:', url);
+    });
+  } else {
+    window.prompt('Copie o link abaixo:', url);
+  }
+}
+
+// lê a URL ao carregar a página (#post=ID&campanha=UUID) e, se houver um link
+// direto de card, entra na campanha certa e já abre o post — depois do login,
+// já que enterCampaign() passa por requireLogin() normalmente.
+function checkDeepLink(){
+  const m = location.hash.match(/post=(\d+)&campanha=([0-9a-fA-F-]+)/);
+  if(!m) return;
+  const postId = parseInt(m[1], 10);
+  const campaignId = m[2];
+  if(!CAMPAIGNS.some(c => c.id === campaignId)) return;
+  requireLogin(() => {
+    currentCampaignId = campaignId;
+    const c = CAMPAIGNS.find(x => x.id === campaignId);
+    if(c){
+      document.getElementById('appSubtitle').textContent = c.subtitle || (c.dateStart && c.dateEnd ? `${fmtDate(c.dateStart)} a ${fmtDate(c.dateEnd)}` : '');
+    }
+    document.getElementById('landingView').style.display = 'none';
+    document.getElementById('appView').style.display = 'block';
+    setView('list');
+    updateSidebarActionState();
+    if(posts[postId]){
+      openPost(postId);
+    } else {
+      alert('Esse post não foi encontrado — pode ter sido removido.');
+    }
+  }, { allowGuest: true });
+}
+
 function renderPostModal(){
   const idx = currentPostIdx;
   const p = posts[idx];
@@ -1658,6 +1705,7 @@ function renderPostModal(){
   modal.innerHTML = `<button class="close" onclick="closeModal()" aria-label="Fechar">✕</button>
     <div class="modal-top-row">
       ${reviewToggleButtonsHtml(idx, 28)}
+      <button type="button" class="copy-link-pill" onclick="copyPostLink(${idx})"><img src="data:image/png;base64,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" alt="" class="copy-link-icon"> Copiar URL do card</button>
       <div class="stage-ratchet-wrap">${stageRatchetHtml(idx)}</div>
     </div>
     <div class="meta-row">
@@ -2001,6 +2049,7 @@ function setupScrollLock(){
   updatePermissionUI();
   renderLandingList(); // primeira visão: landing page
   updateSidebarActionState();
+  checkDeepLink();
 })();
 </script>
 </body>
