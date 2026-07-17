@@ -700,8 +700,12 @@ async function submitEditCampaign(id){
   const subtitle = document.getElementById('ecSubtitle').value.trim();
   const dateStart = document.getElementById('ecStart').value || null;
   const dateEnd = document.getElementById('ecEnd').value || null;
-  const { error } = await sb.from('campaigns').update({ title, subtitle, date_start: dateStart, date_end: dateEnd }).eq('id', id);
+  const { data, error } = await sb.from('campaigns').update({ title, subtitle, date_start: dateStart, date_end: dateEnd }).eq('id', id).select('id');
   if(error){ console.warn(error); alert('Não foi possível salvar as alterações.'); return; }
+  if(!data || data.length === 0){
+    alert('As alterações não foram salvas — provavelmente falta permissão (RLS) de UPDATE na tabela "campaigns" no Supabase. Peça para rodar o script ajuste-schema-fase5-rls-delete.sql.');
+    return;
+  }
   closeUtilModal();
   await loadCampaigns();
   renderLandingList();
@@ -730,11 +734,22 @@ async function confirmDeleteCampaign(id){
   if(!isAllan()){ alert('Somente Allan pode deletar campanhas.'); return; }
   const campPosts = posts.filter(p => p && p.__campaignId === id);
   if(campPosts.length){
-    const { error: delPostsErr } = await sb.from('posts').delete().eq('campaign_id', id);
+    const { data: delPostsData, error: delPostsErr } = await sb.from('posts').delete().eq('campaign_id', id).select('id');
     if(delPostsErr){ console.warn(delPostsErr); alert('Não foi possível apagar os posts da campanha.'); return; }
+    if(!delPostsData || delPostsData.length === 0){
+      alert('Nenhum post foi apagado — provavelmente falta permissão (RLS) de DELETE na tabela "posts" no Supabase. Peça para rodar o script ajuste-schema-fase5-rls-delete.sql.');
+      return;
+    }
   }
-  const { error } = await sb.from('campaigns').delete().eq('id', id);
+  // .select() no delete força o Supabase a devolver as linhas realmente afetadas —
+  // sem isso, um DELETE bloqueado por RLS "funciona" sem erro mas apaga 0 linhas,
+  // e o site mostraria sucesso mesmo sem ter deletado nada.
+  const { data, error } = await sb.from('campaigns').delete().eq('id', id).select('id');
   if(error){ console.warn(error); alert('Não foi possível deletar a campanha.'); return; }
+  if(!data || data.length === 0){
+    alert('A campanha não foi deletada — provavelmente falta permissão (RLS) de DELETE na tabela "campaigns" no Supabase. Peça para rodar o script ajuste-schema-fase5-rls-delete.sql.');
+    return;
+  }
   closeUtilModal();
   await loadCampaigns();
   await loadPostsFromSupabase();
