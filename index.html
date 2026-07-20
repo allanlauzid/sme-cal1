@@ -564,7 +564,7 @@ function renderKanban(){
           <span class="tag ${p['Formato']}">${p['Formato']}</span>
           ${reviewDotsHtml(idx, 24)}
         </div>
-        <div class="kc-seg">${p['Segmento/Página']}</div>
+        <div class="kc-seg">${p.__modified ? '<span style="color:#e11d1d;font-weight:700;font-size:3em;line-height:0;vertical-align:middle;display:inline-block;">*</span> ' : ''}${p['Segmento/Página']}</div>
         <div class="kc-date">${fmtDate(p['Data'])}</div>
       </div>`;
     }).join('');
@@ -1482,7 +1482,7 @@ function postCardHtml(p){
       </div>
     </div>
     <div class="seg">${p['Segmento/Página']}</div>
-    <div class="gancho">${p.__modified ? '<span style="color:#e11d1d;font-weight:700;">*</span> ' : ''}${p['Gancho']}</div>
+    <div class="gancho">${p.__modified ? '<span style="color:#e11d1d;font-weight:700;font-size:3em;line-height:0;vertical-align:middle;display:inline-block;">*</span> ' : ''}${p['Gancho']}</div>
     <div class="foot"><span>${p['Semana']}</span><span>Ver detalhes →</span></div>
   </div>`;
 }
@@ -1720,7 +1720,7 @@ function renderPostModal(){
       <span class="pub-badge-outline" title="${p['Público-alvo']}">${letter}</span>
       <span style="font-size:12.5px;color:#66758A;">${fmtDate(p['Data'])} · ${p['Semana']}</span>
     </div>
-    <h2>${p['Segmento/Página']}</h2>
+    <h2>${p.__modified ? '<span style="color:#e11d1d;font-weight:700;font-size:3em;line-height:0;vertical-align:middle;display:inline-block;">*</span> ' : ''}${p['Segmento/Página']}</h2>
     <a class="url-link" href="${p['URL de apoio']}" target="_blank" rel="noopener">${p['URL de apoio']}</a>
     <div class="edit-toolbar">${editActionButtonsHtml()}</div>
     ${field('Público-alvo (Público '+letter+')', p['Público-alvo'], 'pub')}
