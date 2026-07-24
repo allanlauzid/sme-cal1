@@ -184,6 +184,7 @@
   .offline-menu.open{display:block;}
   .offline-menu button{display:block; width:100%; text-align:left; border:none; background:none; padding:10px 14px; font-size:12.5px; color:var(--navy); cursor:pointer;}
   .offline-menu button:hover{background:#f4f6f9;}
+  .offline-menu button:disabled{opacity:.4; cursor:not-allowed; background:none;}
   .user-badge{font-size:11.5px; color:#c9d3e0; padding:6px 10px; border-radius:8px; background:rgba(255,255,255,.08); cursor:pointer;}
   .user-badge:hover{background:rgba(255,255,255,.16);}
 
@@ -344,9 +345,9 @@
   <div class="sidebar-offline" id="offlineWrap">
     <button type="button" class="sidebar-btn" id="btnOffline" onclick="toggleOfflineMenu()"><img class="sidebar-icon" src="data:image/png;base64,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" alt=""> Offline ▾</button>
     <div class="offline-menu" id="offlineMenu">
-      <button onclick="doExportTxt()">Exportar (.txt)</button>
-      <button onclick="doExportModeloTxt()">Modelo (.txt)</button>
-      <button onclick="doImportTxt()">Importar (.txt)</button>
+      <button type="button" id="btnOfflineExportar" onclick="doExportTxt()"><strong>Exportar</strong> (.txt)</button>
+      <button type="button" id="btnOfflineImportar" onclick="doImportTxt()"><strong>Importar</strong> (.txt)</button>
+      <button type="button" id="btnOfflineModelo" onclick="doExportModeloTxt()"><strong>Modelo</strong> (.txt)</button>
     </div>
   </div>
   <button type="button" class="sidebar-btn" id="btnNovo" onclick="confirmNovo()"><svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg> Novo</button>
@@ -1120,6 +1121,13 @@ function updatePermissionUI(){
     const btn = document.getElementById(id);
     if(!btn) return;
     btn.style.display = allan ? '' : 'none';
+  });
+  // Exportar/Importar/Modelo exigem identificação (não bastam visitante); sem login,
+  // os botões ficam visíveis mas desativados, no mesmo padrão visual do resto do menu.
+  const logged = !!currentUser;
+  ['btnOfflineExportar','btnOfflineImportar','btnOfflineModelo'].forEach(id => {
+    const btn = document.getElementById(id);
+    if(btn) btn.disabled = !logged;
   });
 }
 
