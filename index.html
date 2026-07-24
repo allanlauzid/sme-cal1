@@ -21,6 +21,17 @@
     *, *::before, *::after{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important;}
   }
   :focus-visible{outline:2px solid var(--gold); outline-offset:2px; border-radius:4px;}
+.version-badge{
+  position:fixed; right:18px; bottom:6px; font-size:56px; font-weight:800;
+  color:var(--navy); opacity:0; transition:opacity .3s ease; z-index:5;
+  user-select:none; line-height:1; pointer-events:auto;
+}
+.version-badge:hover{ opacity:.85; }
+.import-dropzone{
+  border:2px dashed var(--border); border-radius:12px; padding:34px 16px; text-align:center;
+  cursor:pointer; color:var(--muted-text); font-size:13px; transition:background .15s,border-color .15s;
+}
+.import-dropzone.dragover{ border-color:var(--gold); background:rgba(214,154,42,0.08); }
   [role="button"]{cursor:pointer;}
   @media (min-width:761px){ body{zoom:1.25;} }
   header{background:linear-gradient(135deg,var(--navy),var(--navy-deep)); color:#fff; padding:20px 24px; position:sticky; top:0; z-index:var(--z-header); box-shadow:0 4px 14px rgba(0,0,0,.18);}
@@ -334,6 +345,7 @@
     <button type="button" class="sidebar-btn" id="btnOffline" onclick="toggleOfflineMenu()"><img class="sidebar-icon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAIoElEQVR4nO2bbYxcVRnHf88596W2UJAEJRBT0DTN7pCIZhUT+QCRGNpEXvwwmgh0W4iNYogYSDRGMkxixPjyAUVi8AW6wAechCCaQDAm7AcNiRYRZDvUBoQPtvClYNvdmXvvOY8fzp19a3d3tp2d2cT9J5NM7j0vz/9/n/P2nHNgsBCoWYB0bM/9aXXv+2l172w6tvcJLv78lpCkbgZp0CArE2o1A02XjO35KTb5NurPQ32Kjb+cfOCDT/Hh2gg0/CBFGFRFgXyz6ZLRiYfEpndSdApAAaFoF2Lj65KtW/4waBEGUck8+bGJn0tU+RrFbI4QARJSSBRESD+bnHfO7wcpwnpXsJi8rdwRyEt8aspSBJNcO0gR1rPw3snP5Ri8COtV8NrJz+UcrAjrUeiZktfyN1ARpN8FUq8bGg2/AnkFkS7XeUu6j3z5HlAtiCqR+uxP2UhyAwcenp0voz/oswA1C02Xjt76I6It9ywhX35dI6hrg6mUjxQRUa/HRHQEsRXUeZDwtVVzopGYov1s56LLbmAKH7yhP+ijS9UNNF1avWU7Yu/BdRwiUflSQTw2Eby7U5G/YyJAPagiEaDTKDeCdBBrwjtAJKaYzYnSXck7b+yEhqcWZpP9QB8FmBYAUXMJYkB9mOQEIg4bW3WduzqtyQcFPXexFysicn6nNfm8FsUXShEExYX3oqBekMsAePfdvnluHwVoekDaM/KK+uIdojQC9Yg12CRS17krOzj5ANQNyqkurFpA3WSHJp+lyG4CybCRBfUYm+AL4/EvADB1zUZsAijUhbf2v2fQL+FdC6xXkaPkna9mBycf4Op6tHL7bXjG98WdQ48/h8+uR/UQWK9wBOduy1uP/zM0tf71Af0fBUKZSrWWJOaCj2bHO0d5a/973Q4SIB3d/TI2vgKfByImNrj85U5r8hOhiDLt9p1pUtn2kWzm2BHeaL4/V3YfEa2eZM1QqBumG1kGrfBonnxvaDqoGw43OmdeRm9Yp5lgwwNSTlzkzAzvRxmrYz08oAuFxtm6az/KWBEDjb5sRJypB/Taefbr661bfT16QM2GIWxuBqY9/vqFNdR3iq0rYhUPqNkwwWk6phY8Ht8XM3ts9a8yjTv7zqtmqbI6mZELlAMP50tsFQhxyOWyLSeAQF2g4QBGxvZ+2gnXifpPAtt0prMVRpb3HlUnUSWi2vlxZ5oHqf3W0vzi2oQo86TVLXdgkru1aBeILC/ETMfL2MRx4G0V8zfr/fOzrf0vzg2poTM9xStPJ0A52Whocvme6/HyLS9ylZionNYroqt5t0ckwmn7QgDefW3tE64yj1e90Ep0KWLnFojLQgSQK0TM9Z6ikYzt/TPifphNN55ZzG0eSwUIhlZrScI5Dwnx7RgPPleKwoEIoquTUQq0iAST98J1RU6YHC086gvwKzdZBVQ0rDCxYuKrIPpdUt3z6yw7+nUOP5exRISFBYb2Mn6BSU92niZOd5G3CwQBsWUUt3QjWdkFRDUY0o8puw+kpId6UUEwcwEVXzgUlbhyexpddElnfN+NHDjmy4WbwqJRIHQW6Yn2D4hHdpHPZiVpC2i5NBUkMpjYrviTKMXGVpH0bOmrUsGWZa5eb5g1BlsVCB8ub2fEI7vSk+37Q59Qm+NdekDdQMMlOyZGMeYbFG23JIwlRInFZYovDiu8g1AsbzVOfGZB/wXAh6bXPiTO5zmEz15QXzhkhdFAiQQuQmR7aetC6+PAyd6V7Jj4VXZof6u7qgwCXP2CYQovRm/BxpbQ45ZtRQQRh8t/5r38Jj83bYXhZg1onsFQWObJW5OTOUz2lGd8XxyfyEYN+W2IuRNVCxoCM+qVqBKJdm4G7u1yDgJMXeNhChX5lKinJA+giHFe81vyg489OV9Tr9HZ0w89a0Q5JPeAA408h1eBb8Zje140Yh5HXWgWIoJ6VLgSmOMcLTAUUT1/3l71SGTUF2/krceepFazNCF0IP0LSPSAtSyIQkdeg7z56JPJ6O7viYm2o4Xvdv6BI3TLXHUtIEIBKjQldIJ9Dkj0GQpNTzPEJETeXL6fKtGLK8vqw89GRKMMyq6M//vl8KYAwzZg2NgUYEj1nqZTHU5HOyQBxJQztBIa5u1DwGAF6G5qCv/GxALkQFb+f3NRmgFhsAI0qwqI9/JddfkRbCXFVirqsiNe5V5AyjQDw3ruC5wGYbMjf/3RV7eM3jzulBsBIjnx9MzrzaOADHiaPWgBgHLrbKbVOAL8Yv5xfzc9e8UwBCAQVeHq+0J7n7rPgQycPAxNAABRprpBlcbQrNicCA3bgGFjU4BhGzBsbAowbAOGjU0Bhm3AsLEpQG/JBnuTqz+o9WTz6olUzfwB5R53aIaKugRbmy7YvjK6m6MCDVU4IXOhdDGo80h8abpjYmenuf+57ovu7suGwsJdqyak1YmdqL10wdF7FzaO5XjIEDgv3hyFlxBzLapabrELognWPJWM7fm+ETfZnn7sbWi6UOHGQ6V66zavdjfIdxBN0DL+qKqIQdCXgIWcobsWjy/fe4VRXka9Y1GMTsDGUGQnQadB/kMIZ20kxKCXgFSJknNwOUtirw4x1gsfz1975B9dzvNtulaz4Z7P7oclGvlKOCAhSflWUTwiFmMBsz7HrM8G4boNeAeqLpwUoXv1JiMeSbSY/WV2cHJflyssphG2ocePVJKZzh/FVj5TXnBceDpJAd91qkFx6xHd7mueOOpRHNFIrK79l2xL+jkOXNxeuG2/9DuG3d/tN5+XJvF+MclNqi4ckkJCFKc8ijUoVmtEOCAVbpgYTCwiFvX5090sm+DwE/9lyQ736YjMJaiM7t6tYu9G5GPlNZi5o3IbExKctWsr+op4ftJuPTI5n2Cx8ct9yfIOm4SLD2zdCf4GUbkS/DbQrasf2hs01IMcB/O2Cn9F9ZlMTj7LdDMrPRdO8+X+B1LB+3XJQ5cXAAAAAElFTkSuQmCC" alt=""> Offline ▾</button>
     <div class="offline-menu" id="offlineMenu">
       <button onclick="doExportTxt()">Exportar (.txt)</button>
+      <button onclick="doExportModeloTxt()">Modelo (.txt)</button>
       <button onclick="doImportTxt()">Importar (.txt)</button>
     </div>
   </div>
@@ -1843,12 +1855,125 @@ document.addEventListener('click', (e) => {
 
 function doExportTxt(){
   closeOfflineMenu();
-  requireLogin(() => exportSuggestions(currentUser.name));
+  requireLogin(() => openExportModal());
+}
+
+function doExportModeloTxt(){
+  closeOfflineMenu();
+  requireLogin(() => exportModeloNovosPosts());
 }
 
 function doImportTxt(){
   closeOfflineMenu();
-  document.getElementById('importFile').click();
+  requireLogin(() => openImportModal());
+}
+
+// ---- Modal de exportação (com opções em checkbox/radio) ----
+function openExportModal(){
+  const optionsHtml = posts.map((p, idx) => {
+    if(!p) return '';
+    return `<label style="display:flex;align-items:center;gap:6px;font-size:12.5px;padding:3px 0;">
+      <input type="checkbox" class="exp-post-chk" value="${idx}"> ${p['Data']} · ${escapeHtml(p['Formato'])} · ${escapeHtml(p['Segmento/Página'])}
+    </label>`;
+  }).join('');
+
+  openUtilModal(`
+    <h3>Exportar (.txt)</h3>
+    <div style="text-align:left;font-size:13px;max-height:65vh;overflow-y:auto;padding-right:4px;">
+      <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <input type="radio" name="expNivel" value="original" checked> Só posts originais
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <input type="radio" name="expNivel" value="ultima"> Posts originais + última edição
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <input type="radio" name="expNivel" value="todas"> Posts originais + todas as edições
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;border-top:1px solid var(--border);padding-top:10px;">
+        <input type="checkbox" id="expEspecificos" onchange="toggleExportPostList()"> Só posts específicos
+      </label>
+      <div id="expPostListWrap" style="display:none;max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px;margin-bottom:6px;">
+        <div style="margin-bottom:6px;display:flex;gap:8px;">
+          <button type="button" onclick="toggleAllExportPosts(true)" style="font-size:11.5px;border:1px solid var(--border);background:#fff;border-radius:6px;padding:3px 8px;cursor:pointer;">Marcar todos</button>
+          <button type="button" onclick="toggleAllExportPosts(false)" style="font-size:11.5px;border:1px solid var(--border);background:#fff;border-radius:6px;padding:3px 8px;cursor:pointer;">Desmarcar todos</button>
+        </div>
+        ${optionsHtml}
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="opt-cancel" onclick="closeUtilModal()">Cancelar</button>
+      <button class="opt-primary" onclick="submitExport()">Exportar</button>
+    </div>
+  `);
+}
+
+function toggleExportPostList(){
+  const chk = document.getElementById('expEspecificos');
+  const wrap = document.getElementById('expPostListWrap');
+  if(wrap) wrap.style.display = (chk && chk.checked) ? 'block' : 'none';
+}
+
+function toggleAllExportPosts(v){
+  document.querySelectorAll('.exp-post-chk').forEach(el => { el.checked = v; });
+}
+
+function submitExport(){
+  const nivelInput = document.querySelector('input[name="expNivel"]:checked');
+  const nivel = nivelInput ? nivelInput.value : 'original';
+  const especificosChk = document.getElementById('expEspecificos');
+  let idxFiltro = null;
+  if(especificosChk && especificosChk.checked){
+    idxFiltro = Array.from(document.querySelectorAll('.exp-post-chk:checked')).map(el => parseInt(el.value, 10));
+    if(!idxFiltro.length){ alert('Selecione ao menos um post na lista.'); return; }
+  }
+  closeUtilModal();
+  exportPostsCustom(currentUser.name, nivel, idxFiltro);
+}
+
+// ---- Modal de importação (drag-and-drop ou clique para procurar) ----
+function openImportModal(){
+  openUtilModal(`
+    <h3>Importar (.txt)</h3>
+    <div class="import-dropzone" id="importDropzone">
+      Arraste o arquivo .txt aqui<br>ou clique para procurar
+    </div>
+    <input type="file" id="importFileModal" accept=".txt" style="display:none">
+    <div class="btn-row" style="margin-top:14px;">
+      <button class="opt-cancel" onclick="closeUtilModal()">Cancelar</button>
+    </div>
+  `);
+  setupImportDropzone();
+}
+
+function setupImportDropzone(){
+  const zone = document.getElementById('importDropzone');
+  const input = document.getElementById('importFileModal');
+  if(!zone || !input) return;
+  zone.addEventListener('click', () => input.click());
+  input.addEventListener('change', (e) => {
+    if(e.target.files[0]) handleImportFile(e.target.files[0]);
+  });
+  zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => { zone.classList.remove('dragover'); });
+  zone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+    const file = e.dataTransfer.files && e.dataTransfer.files[0];
+    if(file) handleImportFile(file);
+  });
+}
+
+function handleImportFile(file){
+  if(!file.name.toLowerCase().endsWith('.txt')){
+    alert('Selecione um arquivo .txt.');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = async function(e){
+    closeUtilModal();
+    await parseImportedText(e.target.result);
+  };
+  reader.readAsText(file, 'utf-8');
 }
 
 function getOriginalFieldText(idx, key){
@@ -1932,17 +2057,26 @@ function diaSemana(iso){
   return dias[new Date(+y,+m-1,+d).getDay()];
 }
 
-function exportSuggestions(editorName){
+async function exportPostsCustom(editorName, nivel, idxFiltro){
   const name = editorName || 'Anônimo';
   const now = new Date();
   const lines = [];
-  lines.push('CALENDÁRIO EDITORIAL SME PE/PB — RESPOSTAS DE REVISÃO');
-  lines.push('Revisor: ' + name);
+  const nivelLabel = {
+    original:'Só posts originais',
+    ultima:'Posts originais + última edição',
+    todas:'Posts originais + todas as edições'
+  }[nivel] || nivel;
+  lines.push('CALENDÁRIO EDITORIAL SME PE/PB — EXPORT (' + nivelLabel + ')');
+  lines.push('Exportado por: ' + name);
   lines.push('Exportado em: ' + now.toLocaleString('pt-BR'));
   lines.push('='.repeat(70));
   lines.push('');
 
-  posts.forEach((p, idx) => {
+  const indices = idxFiltro ? idxFiltro.slice().sort((a,b) => a - b) : posts.map((_, i) => i);
+
+  for(const idx of indices){
+    const p = posts[idx];
+    if(!p) continue;
     const dia = p['Data'].split('-')[2];
     const mes = p['Data'].split('-')[1];
     const dow = diaSemana(p['Data']);
@@ -1950,25 +2084,109 @@ function exportSuggestions(editorName){
     lines.push(`--- ${dia}/${mes} · ${dow} · ${p['Formato']} · ${p['Segmento/Página']} ---`);
     const keys = fieldKeysForPost(p);
     const postSug = suggestions[idx] || {};
-    keys.forEach(key => {
+    for(const key of keys){
       const label = EXPORT_FIELD_LABELS[key] || key;
       const original = getOriginalFieldText(idx, key) || '(vazio)';
-      const sug = postSug[key];
       lines.push(`##CAMPO chave=${key} label="${label}"`);
       lines.push('ORIGINAL:');
       lines.push(original);
       lines.push('SUGESTAO:');
-      lines.push(sug ? sug.text : '(não respondido)');
+      if(nivel === 'original'){
+        lines.push('(não respondido)');
+      } else {
+        const sug = postSug[key];
+        lines.push(sug ? sug.text : '(não respondido)');
+      }
       lines.push('##FIM');
-    });
+
+      // No nível "todas as edições", acrescenta o histórico completo (post_field_versions)
+      // em um bloco separado, que o importador ignora (não interfere no reimport).
+      if(nivel === 'todas'){
+        let historico = [];
+        try{
+          const { data, error } = await sb.from('post_field_versions')
+            .select('value, editor_name, edited_at')
+            .eq('post_id', idx).eq('field_key', key)
+            .order('edited_at', { ascending: true });
+          if(!error && data) historico = data;
+        }catch(e){ /* segue sem histórico se a consulta falhar */ }
+        lines.push(`##HISTORICO chave=${key}`);
+        if(historico.length){
+          historico.forEach(v => {
+            const quando = v.edited_at ? new Date(v.edited_at).toLocaleString('pt-BR') : '—';
+            lines.push(`  - [${quando}] ${v.editor_name || '—'}: ${v.value}`);
+          });
+        } else {
+          lines.push('  (sem edições registradas para este campo)');
+        }
+        lines.push('##FIM_HISTORICO');
+      }
+    }
     lines.push('###FIM POST');
     lines.push('');
-  });
+  }
 
   const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `calendario_editorial_${slug(name)}_${timestampLabel(now)}.txt`;
+  a.download = `calendario_editorial_${nivel}_${slug(name)}_${timestampLabel(now)}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+// Gera um .txt com blocos em branco no formato ###POST id=NOVO, prontos para
+// preencher manualmente e reimportar. Vem com 5 blocos por padrão — se precisar
+// de mais, é só copiar e colar um bloco inteiro (de ###POST id=NOVO até ###FIM POST)
+// quantas vezes quiser antes de importar.
+const MODELO_CAMPOS = [
+  ['pub', 'Público-alvo'],
+  ['dor', 'Dor / Intenção'],
+  ['gancho', 'Gancho'],
+  ['objetivo', 'Objetivo do post'],
+  ['estrutura', 'Estrutura'],
+  ['textoArte', 'Texto da arte'],
+  ['legenda', 'Legenda / copy'],
+  ['cta', 'CTA'],
+  ['prompt', 'Prompt generativo de imagem'],
+  ['tom', 'Tom obrigatório'],
+  ['status', 'Status']
+];
+
+function exportModeloNovosPosts(qtd){
+  const total = qtd || 5;
+  const lines = [];
+  lines.push('CALENDÁRIO EDITORIAL SME PE/PB — MODELO PARA POSTS NOVOS');
+  lines.push('='.repeat(70));
+  lines.push('Como usar:');
+  lines.push('1) Em cada bloco ###POST, preencha data (AAAA-MM-DD), dia, mes, dow (seg/ter/qua/qui/sex/sáb/dom), tipo (Stories, Feed ou Reels) e titulo (nome do segmento).');
+  lines.push('2) Em cada ##CAMPO, escreva o conteúdo logo abaixo de SUGESTAO: (não mexa na linha ORIGINAL:).');
+  lines.push('3) Deixe em branco (ou apague) os campos e/ou blocos que não for usar — blocos sem nenhum conteúdo preenchido são ignorados na importação.');
+  lines.push('4) Precisa de mais de ' + total + ' posts novos? Copie um bloco inteiro (de ###POST id=NOVO até ###FIM POST) e cole quantas vezes precisar antes de importar.');
+  lines.push('5) Depois de preencher, importe este arquivo pelo botão "Importar (.txt)", logado como Allan e com a campanha certa aberta.');
+  lines.push('='.repeat(70));
+  lines.push('');
+
+  for(let n=1; n<=total; n++){
+    lines.push(`###POST id=NOVO data=AAAA-MM-DD dia=DD mes=MM dow=seg tipo=Stories titulo="NOME DO SEGMENTO ${n}"`);
+    lines.push(`--- POST NOVO ${n} de ${total} ---`);
+    MODELO_CAMPOS.forEach(([key, label]) => {
+      lines.push(`##CAMPO chave=${key} label="${label}"`);
+      lines.push('ORIGINAL:');
+      lines.push('(novo)');
+      lines.push('SUGESTAO:');
+      lines.push('');
+      lines.push('##FIM');
+    });
+    lines.push('###FIM POST');
+    lines.push('');
+  }
+
+  const now = new Date();
+  const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `calendario_editorial_MODELO_${total}posts_${timestampLabel(now)}.txt`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -1978,28 +2196,66 @@ function importSuggestions(event){
   const file = event.target.files[0];
   if(!file) return;
   const reader = new FileReader();
-  reader.onload = function(e){
-    parseImportedText(e.target.result);
+  reader.onload = async function(e){
+    await parseImportedText(e.target.result);
     event.target.value = '';
   };
   reader.readAsText(file, 'utf-8');
 }
 
-function parseImportedText(text){
+// Mapa chave interna -> nome do campo em `fields` (usado ao criar post novo, mesmo
+// esquema de campos que submitNewPost() usa para o formulário "Criar post").
+const NOVO_POST_FIELD_MAP = {
+  pub:'Público-alvo', dor:'Dor/Intenção', gancho:'Gancho', objetivo:'Objetivo do post',
+  estrutura:'Estrutura', textoArte:'Texto da arte', legenda:'Legenda/copy', cta:'CTA',
+  prompt:'Prompt generativo de imagem', tom:'Tom obrigatório', status:'Status'
+};
+
+// Suporta dois tipos de bloco no .txt importado:
+//  1) ###POST id=<numero> ...   -> edição (SUGESTAO) de um post já existente, como antes.
+//  2) ###POST id=NOVO ...       -> cria um post novo no Supabase (somente Allan, dentro
+//                                   de uma campanha aberta), usando os valores em SUGESTAO
+//                                   como o conteúdo final dos campos.
+async function parseImportedText(text){
   const lines = text.split(/\r?\n/);
   let i = 0;
   let currentIdx = null;
+  let novoPost = null;
   let imported = 0;
+  const novosPosts = [];
+
   while(i < lines.length){
     const line = lines[i];
-    const postMatch = line.match(/^###POST id=(\d+)/);
-    if(postMatch){
-      currentIdx = parseInt(postMatch[1], 10);
+
+    const postMatchNovo = line.match(/^###POST id=NOVO data=(\S+) dia=\S+ mes=\S+ dow=\S+ tipo=(\S+) titulo="([^"]+)"/);
+    if(postMatchNovo){
+      currentIdx = null;
+      novoPost = { data: postMatchNovo[1], tipo: postMatchNovo[2], titulo: postMatchNovo[3], fields: {} };
       i++;
       continue;
     }
+
+    const postMatch = line.match(/^###POST id=(\d+)/);
+    if(postMatch){
+      currentIdx = parseInt(postMatch[1], 10);
+      novoPost = null;
+      i++;
+      continue;
+    }
+
+    const fimPostMatch = line.match(/^###FIM POST/);
+    if(fimPostMatch && novoPost){
+      // Ignora blocos de modelo que ficaram totalmente em branco (nenhum campo preenchido)
+      if(Object.keys(novoPost.fields).length > 0){
+        novosPosts.push(novoPost);
+      }
+      novoPost = null;
+      i++;
+      continue;
+    }
+
     const campoMatch = line.match(/^##CAMPO chave=(\S+)/);
-    if(campoMatch && currentIdx !== null){
+    if(campoMatch && (currentIdx !== null || novoPost)){
       const key = campoMatch[1];
       i++;
       // skip to ORIGINAL:
@@ -2012,8 +2268,13 @@ function parseImportedText(text){
       while(i < lines.length && lines[i] !== '##FIM'){ sugLines.push(lines[i]); i++; }
       const sugText = sugLines.join('\n').trim();
       if(sugText && sugText !== '(não respondido)'){
-        if(!suggestions[currentIdx]) suggestions[currentIdx] = {};
-        suggestions[currentIdx][key] = { text: sugText, editor: (currentUser ? currentUser.name : 'Importado (offline)'), editedAt: new Date().toISOString(), synced: false };
+        if(novoPost){
+          const fieldLabel = NOVO_POST_FIELD_MAP[key];
+          if(fieldLabel) novoPost.fields[fieldLabel] = sugText;
+        } else {
+          if(!suggestions[currentIdx]) suggestions[currentIdx] = {};
+          suggestions[currentIdx][key] = { text: sugText, editor: (currentUser ? currentUser.name : 'Importado (offline)'), editedAt: new Date().toISOString(), synced: false };
+        }
       }
       imported++;
       i++; // move past ##FIM
@@ -2021,12 +2282,55 @@ function parseImportedText(text){
     }
     i++;
   }
+
   persistSuggestions();
+
+  let criados = 0, comErro = 0;
+  if(novosPosts.length){
+    if(!isAllan()){
+      alert('O arquivo contém ' + novosPosts.length + ' post(s) novo(s) marcados com id=NOVO, mas somente Allan pode criar posts. Faça login como Allan e importe novamente para criá-los.');
+    } else if(!currentCampaignId){
+      alert('O arquivo contém ' + novosPosts.length + ' post(s) novo(s) marcados com id=NOVO. Abra a campanha onde eles devem entrar e importe novamente para criá-los.');
+    } else {
+      let nextId = posts.reduce((max, p) => p ? Math.max(max, p.__id) : max, -1) + 1;
+      for(const np of novosPosts){
+        const fields = {
+          'Data': np.data, 'Semana': diaSemana(np.data), 'Formato': np.tipo, 'Segmento/Página': np.titulo,
+          'URL de apoio': np.fields['URL de apoio'] || '',
+          'Público-alvo': np.fields['Público-alvo'] || '',
+          'Dor/Intenção': np.fields['Dor/Intenção'] || '',
+          'Gancho': np.fields['Gancho'] || '',
+          'Objetivo do post': np.fields['Objetivo do post'] || '',
+          'Estrutura': np.fields['Estrutura'] || '',
+          'Texto da arte': np.fields['Texto da arte'] || '',
+          'Legenda/copy': np.fields['Legenda/copy'] || '',
+          'CTA': np.fields['CTA'] || '',
+          'Prompt generativo de imagem': np.fields['Prompt generativo de imagem'] || '',
+          'Tom obrigatório': np.fields['Tom obrigatório'] || '',
+          'Status': np.fields['Status'] || 'A produzir'
+        };
+        const row = { id: nextId, data: np.data, dow: diaSemana(np.data), tipo: np.tipo, titulo: np.titulo, fields, kanban_stage: 1, campaign_id: currentCampaignId };
+        const { error } = await sb.from('posts').insert(row);
+        if(error){ console.warn(error); comErro++; } else { criados++; nextId++; }
+      }
+      if(criados){
+        await loadPostsFromSupabase();
+      }
+    }
+  }
+
   if(currentPostIdx !== null && document.getElementById('backdrop').classList.contains('active')){
     renderPostModal();
   }
   renderAll();
-  alert('Importação concluída: ' + imported + ' campo(s) processado(s).');
+
+  let msg = 'Importação concluída: ' + imported + ' campo(s) processado(s).';
+  if(novosPosts.length){
+    msg += ' Posts novos: ' + criados + ' criado(s)';
+    if(comErro) msg += ', ' + comErro + ' com erro';
+    msg += '.';
+  }
+  alert(msg);
 }
 
 function setupScrollLock(){
@@ -2059,5 +2363,6 @@ function setupScrollLock(){
   checkDeepLink();
 })();
 </script>
+<div class="version-badge">v0.3.0</div>
 </body>
 </html>
