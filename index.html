@@ -572,12 +572,12 @@ function renderKanban(){
     const stage = i+1;
     const cards = (byStage[stage]||[]).map(idx => {
       const p = posts[idx];
-      return `<div class="kanban-card" draggable="true" ${CARD_KBD} ondragstart="kbDragStart(event, ${idx})" onclick="openPost(${idx})">
+      return `<div class="kanban-card" style="${destaqueBorderStyle(p)}" draggable="true" ${CARD_KBD} ondragstart="kbDragStart(event, ${idx})" onclick="openPost(${idx})">
         <div class="tag-with-dots">
           <span class="tag ${p['Formato']}">${p['Formato']}</span>
           ${reviewDotsHtml(idx, 24)}
         </div>
-        <div class="kc-seg">${p.__modified ? '<span style="color:#e11d1d;font-weight:700;font-size:3em;line-height:0;vertical-align:middle;display:inline-block;">*</span> ' : ''}${p['Segmento/Página']}</div>
+        <div class="kc-seg">${p['Segmento/Página']}</div>
         <div class="kc-date">${fmtDate(p['Data'])}</div>
       </div>`;
     }).join('');
@@ -1418,6 +1418,84 @@ Object.entries(pubLabel).sort((a,b)=>a[1].localeCompare(b[1])).forEach(([full,le
 
 function toggleLegend(){ document.getElementById('legendPanel').classList.toggle('open'); }
 
+// Modal independente de legenda (não depende do painel de filtros estar aberto),
+// explica o que cada letra do badge de Público-alvo significa.
+function abrirLegendaModal(){
+  const itens = Object.entries(pubLabel).sort((a,b) => a[1].localeCompare(b[1]))
+    .map(([full, letter]) => `<div style="display:flex;align-items:center;gap:10px;padding:5px 0;font-size:13px;">
+      <span class="pub-badge">${letter}</span> <span>${escapeHtml(full)}</span>
+    </div>`).join('');
+  openUtilModal(`
+    <h3>Legenda de Público-alvo</h3>
+    <div style="text-align:left;max-height:60vh;overflow-y:auto;padding-right:4px;">${itens}</div>
+    <div class="btn-row"><button class="opt-cancel" onclick="closeUtilModal()">Fechar</button></div>
+  `);
+}
+
+// ---- Destaque de post (Allan escolhe uma cor pra chamar atenção dos outros usuários) ----
+const DESTAQUE_CORES = { vermelho:'#e11d1d', amarelo:'#D69A2A', azul:'#1877C9', verde:'#16a34a' };
+function destaqueBorderStyle(p){
+  const cor = DESTAQUE_CORES[p && p['Destaque']];
+  return cor ? `border:4px solid ${cor};` : '';
+}
+
+function toggleDestaqueColorSelect(){
+  const chk = document.getElementById('editDestaqueOn');
+  const sel = document.getElementById('editDestaqueCor');
+  if(sel) sel.style.display = (chk && chk.checked) ? 'inline-block' : 'none';
+}
+
+// Allan edita diretamente qualquer campo estrutural do post (título, data, formato,
+// URL de apoio) e o destaque, gravando direto no Supabase (não passa pela camada de
+// "sugestão" usada pelos demais usuários).
+async function saveAllanMeta(idx){
+  if(!isAllan()){ alert('Somente Allan pode editar esses dados.'); return; }
+  const p = posts[idx];
+  if(!p) return;
+  const novoTitulo = (document.getElementById('editTitulo').value || '').trim();
+  const novaData = document.getElementById('editData').value;
+  const novoFormato = document.getElementById('editFormato').value;
+  const novaUrl = (document.getElementById('editUrl').value || '').trim();
+  const destaqueOn = document.getElementById('editDestaqueOn').checked;
+  const destaqueCor = document.getElementById('editDestaqueCor').value;
+
+  if(!novoTitulo || !novaData){ alert('Título e data não podem ficar vazios.'); return; }
+
+  const fields = { ...p };
+  delete fields.__id; delete fields.__kanban; delete fields.__campaignId;
+  fields['Segmento/Página'] = novoTitulo;
+  fields['Data'] = novaData;
+  fields['Semana'] = fields['Semana'] || '';
+  fields['Formato'] = novoFormato;
+  fields['URL de apoio'] = novaUrl;
+  fields['Destaque'] = destaqueOn ? destaqueCor : '';
+
+  const { error } = await sb.from('posts').update({
+    data: novaData, dow: diaSemana(novaData), tipo: novoFormato, titulo: novoTitulo, fields
+  }).eq('id', idx);
+  if(error){ console.warn(error); alert('Não foi possível salvar os dados do post.'); return; }
+
+  try{
+    await sb.from('audit_log').insert({ post_id: idx, user_id: currentUser.id, user_name: currentUser.name, action_type: 'edit_meta', field_key: null, to_value: novoTitulo });
+  }catch(e){ /* auditoria é best-effort */ }
+
+  await loadPostsFromSupabase();
+  if(document.getElementById('backdrop').classList.contains('active')) renderPostModal();
+  renderAll();
+  showToast('Dados do post atualizados.');
+}
+
+async function excluirPost(idx){
+  if(!isAllan()){ alert('Somente Allan pode excluir posts.'); return; }
+  if(!confirm('Excluir este post definitivamente? Essa ação não pode ser desfeita.')) return;
+  const { error } = await sb.from('posts').delete().eq('id', idx);
+  if(error){ console.warn(error); alert('Não foi possível excluir o post.'); return; }
+  closeModal();
+  await loadPostsFromSupabase();
+  renderAll();
+  showToast('Post excluído.');
+}
+
 function toggleFormato(f){
   const chip = document.getElementById('chip'+f);
   if(state.formatos.has(f)){ state.formatos.delete(f); chip.classList.remove('active-'+f.toLowerCase()); chip.setAttribute('aria-pressed','false'); }
@@ -1474,8 +1552,9 @@ function renderList(){
   const byDate = {};
   list.forEach(p => { (byDate[p['Data']] = byDate[p['Data']] || []).push(p); });
   const dates = Object.keys(byDate).sort();
-  const addBtnHtml = `<div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+  const addBtnHtml = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
     <button type="button" class="legend-btn" id="btnAddPostList" onclick="openNewPostModal()" title="Somente Allan pode criar posts">+ Criar post</button>
+    <button type="button" class="legend-btn" onclick="abrirLegendaModal()">Legenda</button>
   </div>`;
   if(!dates.length){ container.innerHTML = addBtnHtml + '<p style="color:#66758A;padding:20px 0;">Nenhum post encontrado com esses filtros.</p>'; updatePermissionUI(); return; }
   container.innerHTML = addBtnHtml + dates.map(date => {
@@ -1490,7 +1569,7 @@ function postCardHtml(p){
   const letter = pubLabel[p['Público-alvo']];
   const idx = posts.indexOf(p);
   const stage = p.__kanban || 2;
-  return `<div class="post-card" ${CARD_KBD} onclick="openPost(${idx})">
+  return `<div class="post-card" style="${destaqueBorderStyle(p)}" ${CARD_KBD} onclick="openPost(${idx})">
     <div class="row1">
       <div class="tag-with-dots">
         <span class="tag ${p['Formato']}">${p['Formato']}</span>
@@ -1502,7 +1581,7 @@ function postCardHtml(p){
       </div>
     </div>
     <div class="seg">${p['Segmento/Página']}</div>
-    <div class="gancho">${p.__modified ? '<span style="color:#e11d1d;font-weight:700;font-size:3em;line-height:0;vertical-align:middle;display:inline-block;">*</span> ' : ''}${p['Gancho']}</div>
+    <div class="gancho">${p['Gancho']}</div>
     <div class="foot"><span>${p['Semana']}</span><span>Ver detalhes →</span></div>
   </div>`;
 }
@@ -1740,8 +1819,35 @@ function renderPostModal(){
       <span class="pub-badge-outline" title="${p['Público-alvo']}">${letter}</span>
       <span style="font-size:12.5px;color:#66758A;">${fmtDate(p['Data'])} · ${p['Semana']}</span>
     </div>
-    <h2>${p.__modified ? '<span style="color:#e11d1d;font-weight:700;font-size:3em;line-height:0;vertical-align:middle;display:inline-block;">*</span> ' : ''}${p['Segmento/Página']}</h2>
+    <h2>${p['Segmento/Página']}</h2>
     <a class="url-link" href="${p['URL de apoio']}" target="_blank" rel="noopener">${p['URL de apoio']}</a>
+    ${isAllan() ? `
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin:12px 0;padding:12px;border:1px dashed var(--border);border-radius:10px;background:#fbfcfe;">
+      <label style="font-size:11.5px;color:var(--muted);">Título<br>
+        <input type="text" id="editTitulo" value="${escapeHtml(p['Segmento/Página']||'')}" style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:12.5px;width:230px;">
+      </label>
+      <label style="font-size:11.5px;color:var(--muted);">Data<br>
+        <input type="date" id="editData" value="${p['Data']||''}" style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:12.5px;">
+      </label>
+      <label style="font-size:11.5px;color:var(--muted);">Formato<br>
+        <select id="editFormato" style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:12.5px;">
+          ${['Stories','Feed','Reels'].map(t => `<option value="${t}" ${p['Formato']===t?'selected':''}>${t}</option>`).join('')}
+        </select>
+      </label>
+      <label style="font-size:11.5px;color:var(--muted);flex:1;min-width:220px;">URL de apoio<br>
+        <input type="text" id="editUrl" value="${escapeHtml(p['URL de apoio']||'')}" style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:12.5px;width:100%;">
+      </label>
+      <label style="font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:6px;margin-top:16px;">
+        <input type="checkbox" id="editDestaqueOn" ${p['Destaque']?'checked':''} onchange="toggleDestaqueColorSelect()"> Destacar post
+      </label>
+      <select id="editDestaqueCor" style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:12.5px;margin-top:16px;display:${p['Destaque']?'inline-block':'none'};">
+        ${['vermelho','amarelo','azul','verde'].map(c => `<option value="${c}" ${p['Destaque']===c?'selected':''}>${c[0].toUpperCase()+c.slice(1)}</option>`).join('')}
+      </select>
+      <div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+        <button type="button" class="opt-primary" style="padding:7px 16px;font-size:12.5px;" onclick="saveAllanMeta(${idx})">Salvar dados do post</button>
+        <button type="button" style="padding:7px 16px;font-size:12.5px;border:1px solid #e11d1d;background:#fff;color:#e11d1d;border-radius:8px;cursor:pointer;" onclick="excluirPost(${idx})">Excluir post</button>
+      </div>
+    </div>` : ''}
     <div class="edit-toolbar">${editActionButtonsHtml()}</div>
     ${field('Público-alvo (Público '+letter+')', p['Público-alvo'], 'pub')}
     ${field('Dor / Intenção', p['Dor/Intenção'], 'dor')}
