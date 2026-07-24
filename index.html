@@ -1434,9 +1434,12 @@ function abrirLegendaModal(){
 
 // ---- Destaque de post (Allan escolhe uma cor pra chamar atenção dos outros usuários) ----
 const DESTAQUE_CORES = { vermelho:'#e11d1d', amarelo:'#D69A2A', azul:'#1877C9', verde:'#16a34a' };
+// Borda grossa e sempre visível (não depende de hover) — usamos !important pra
+// garantir que nada no CSS de hover do card (post-card:hover / kanban-card:hover)
+// tenha prioridade sobre ela.
 function destaqueBorderStyle(p){
   const cor = DESTAQUE_CORES[p && p['Destaque']];
-  return cor ? `border:4px solid ${cor};` : '';
+  return cor ? `border:8px solid ${cor} !important;` : '';
 }
 
 function toggleDestaqueColorSelect(){
@@ -1566,7 +1569,7 @@ function renderList(){
 }
 
 function postCardHtml(p){
-  const letter = pubLabel[p['Público-alvo']];
+  const letter = pubLabel[p['Público-alvo']] || '';
   const idx = posts.indexOf(p);
   const stage = p.__kanban || 2;
   return `<div class="post-card" style="${destaqueBorderStyle(p)}" ${CARD_KBD} onclick="openPost(${idx})">
@@ -1577,7 +1580,7 @@ function postCardHtml(p){
       </div>
       <div class="list-badges">
         <span class="pub-badge" title="${KANBAN_STAGES[stage-1]}">${stage}</span>
-        <span class="pub-badge-outline" title="${p['Público-alvo']}">${letter}</span>
+        <span class="pub-badge-outline" title="${p['Público-alvo'] || 'Público-alvo não definido'}">${letter}</span>
       </div>
     </div>
     <div class="seg">${p['Segmento/Página']}</div>
@@ -1658,16 +1661,55 @@ function isAttentionField(key){
   return !!(list && list.includes(key));
 }
 
+// Público-alvo é um campo categórico (cada valor tem uma "letra" fixa em pubLabel),
+// por isso ele não usa o field() genérico com texto livre: mostra a bolinha (vazia se
+// não houver público definido) e, para o Allan em modo de edição, um <select> com as
+// opções — a letra dentro da bolinha é atualizada ao vivo conforme ele escolhe.
+function renderPublicoAlvoField(idx, p, letterAtual){
+  const atual = p['Público-alvo'] || '';
+  const sug = (suggestions[idx] && suggestions[idx]['pub']) ? suggestions[idx]['pub'] : null;
+  const valorEfetivo = sug ? sug.text : atual;
+  const letra = pubLabel[valorEfetivo] || '';
+  const badge = `<span class="pub-badge-outline" id="pubPreviewBadge" title="${escapeHtml(valorEfetivo) || 'Público-alvo não definido'}">${letra}</span>`;
+
+  if(editMode && isAllan()){
+    const opts = '<option value="">(não definido)</option>' + Object.keys(pubLabel).map(full =>
+      `<option value="${escapeHtml(full)}" ${full===valorEfetivo?'selected':''}>${escapeHtml(full)} (${pubLabel[full]})</option>`
+    ).join('');
+    return `<div class="field"><div class="lbl">Público-alvo</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        ${badge}
+        <select id="editPubSelect" onchange="atualizarPreviewPub()" style="padding:7px 8px;border:1px solid var(--border);border-radius:6px;font-size:12.5px;flex:1;min-width:0;">${opts}</select>
+      </div>
+    </div>`;
+  }
+
+  const textoAtual = valorEfetivo
+    ? `<div class="val" style="display:flex;align-items:center;gap:8px;">${badge} ${escapeHtml(valorEfetivo)}</div>`
+    : `<div class="val" style="display:flex;align-items:center;gap:8px;color:var(--muted);font-style:italic;">${badge} (vazio)</div>`;
+  return `<div class="field"><div class="lbl">Público-alvo</div>${textoAtual}</div>`;
+}
+
+function atualizarPreviewPub(){
+  const sel = document.getElementById('editPubSelect');
+  const badge = document.getElementById('pubPreviewBadge');
+  if(!sel || !badge) return;
+  badge.textContent = pubLabel[sel.value] || '';
+  badge.title = sel.value || 'Público-alvo não definido';
+}
+
 function field(label, value, key){
-  if(!value) return '';
+  // Antes, campo vazio simplesmente não aparecia (return '') — isso escondia campos de
+  // posts criados só com título/data, e dava a impressão de que não dava pra editá-los.
+  // Agora o campo sempre aparece: fora do modo de edição mostra um "vazio" discreto;
+  // em modo de edição, aparece a área editável em branco, pronta para preencher.
   const idx = currentPostIdx;
   const sug = (key && idx!=null && suggestions[idx] && suggestions[idx][key]) ? suggestions[idx][key] : null;
   const editableAttr = editMode && key ? ` contenteditable="true" data-key="${key}"` : '';
-  // ao entrar em modo de edição, parte da última sugestão salva (se existir) em vez do texto original,
-  // para não perder edições anteriores.
-  // Quando existe sugestão e não está em modo de edição, mostra a sugestão como texto
-  // principal (a versão original só aparece se o usuário clicar em "Ver histórico").
-  const displayValue = sug ? sug.text : value;
+  const displayValue = sug ? sug.text : (value || '');
+  if(!displayValue && !editMode){
+    return `<div class="field"><div class="lbl">${label}</div><div class="val" style="color:var(--muted);font-style:italic;">(vazio)</div></div>`;
+  }
   const valClass = (sug && !editMode) ? ' has-suggestion' : '';
   const sugHtml = (sug && !editMode) ? `<div class="suggestion"><div class="sug-lbl">Sugestão de Edição de ${escapeHtml(sug.editor||'—')}</div><button type="button" class="sug-hist-btn" onclick="showFieldHistory(${idx}, '${key}')">Ver histórico</button></div>` : '';
   const attentionClass = isAttentionField(key) ? ' attention' : '';
@@ -1785,7 +1827,7 @@ function checkDeepLink(){
 function renderPostModal(){
   const idx = currentPostIdx;
   const p = posts[idx];
-  const letter = pubLabel[p['Público-alvo']];
+  const letter = pubLabel[p['Público-alvo']] || '';
   let extra = '';
 
   if(p['Formato'] === 'Reels' && reelsBySeg[p['Segmento/Página']]){
@@ -1816,7 +1858,7 @@ function renderPostModal(){
     </div>
     <div class="meta-row">
       <span class="tag ${p['Formato']}">${p['Formato']}</span>
-      <span class="pub-badge-outline" title="${p['Público-alvo']}">${letter}</span>
+      <span class="pub-badge-outline" title="${p['Público-alvo'] || 'Público-alvo não definido'}">${letter}</span>
       <span style="font-size:12.5px;color:#66758A;">${fmtDate(p['Data'])} · ${p['Semana']}</span>
     </div>
     <h2>${p['Segmento/Página']}</h2>
@@ -1843,13 +1885,14 @@ function renderPostModal(){
       <select id="editDestaqueCor" style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:12.5px;margin-top:16px;display:${p['Destaque']?'inline-block':'none'};">
         ${['vermelho','amarelo','azul','verde'].map(c => `<option value="${c}" ${p['Destaque']===c?'selected':''}>${c[0].toUpperCase()+c.slice(1)}</option>`).join('')}
       </select>
-      <div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
-        <button type="button" class="opt-primary" style="padding:7px 16px;font-size:12.5px;" onclick="saveAllanMeta(${idx})">Salvar dados do post</button>
-        <button type="button" style="padding:7px 16px;font-size:12.5px;border:1px solid #e11d1d;background:#fff;color:#e11d1d;border-radius:8px;cursor:pointer;" onclick="excluirPost(${idx})">Excluir post</button>
+      <div style="width:100%;display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:4px;">
+        <button type="button" onclick="saveAllanMeta(${idx})" style="border:none;padding:11px 14px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;background:var(--navy);color:#fff;">Salvar dados do post</button>
+        <button type="button" onclick="excluirPost(${idx})" style="border:none;padding:11px 14px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;background:#c0392b;color:#fff;">Excluir post</button>
       </div>
     </div>` : ''}
     <div class="edit-toolbar">${editActionButtonsHtml()}</div>
-    ${field('Público-alvo (Público '+letter+')', p['Público-alvo'], 'pub')}
+    ${field('Título / Nome do segmento', p['Segmento/Página'], 'titulo')}
+    ${renderPublicoAlvoField(idx, p, letter)}
     ${field('Dor / Intenção', p['Dor/Intenção'], 'dor')}
     ${field('Gancho', p['Gancho'], 'gancho')}
     ${field('Objetivo do post', p['Objetivo do post'], 'objetivo')}
@@ -1876,11 +1919,26 @@ async function saveEdits(){
   const vals = modal.querySelectorAll('.val[data-key]');
   if(!suggestions[idx]) suggestions[idx] = {};
   const toPersist = [];
+
+  // Público-alvo (só Allan): vem de um <select> dedicado, fora do padrão .val[data-key],
+  // porque é um campo categórico (cada valor tem uma letra fixa em pubLabel).
+  const pubSelect = document.getElementById('editPubSelect');
+  if(pubSelect){
+    const text = pubSelect.value;
+    const originalVal = getOriginalFieldText(idx, 'pub');
+    if(text !== originalVal.trim()){
+      suggestions[idx]['pub'] = { text, editor: currentUser.name, editedAt: new Date().toISOString(), synced: false };
+      toPersist.push('pub');
+    } else {
+      delete suggestions[idx]['pub'];
+    }
+  }
+
   vals.forEach(el => {
     const key = el.getAttribute('data-key');
     const text = el.innerText.trim();
     const originalVal = getOriginalFieldText(idx, key);
-    if(text && text !== originalVal.trim()){
+    if(text !== originalVal.trim()){
       suggestions[idx][key] = { text, editor: currentUser.name, editedAt: new Date().toISOString(), synced: false };
       toPersist.push(key);
     } else {
@@ -2093,7 +2151,7 @@ function handleImportFile(file){
 function getOriginalFieldText(idx, key){
   const p = posts[idx];
   const map = {
-    pub:p['Público-alvo'], dor:p['Dor/Intenção'], gancho:p['Gancho'], objetivo:p['Objetivo do post'],
+    titulo:p['Segmento/Página'], pub:p['Público-alvo'], dor:p['Dor/Intenção'], gancho:p['Gancho'], objetivo:p['Objetivo do post'],
     estrutura:p['Estrutura'], textoArte:p['Texto da arte'], legenda:p['Legenda/copy'], cta:p['CTA'],
     prompt:p['Prompt generativo de imagem'], tom:p['Tom obrigatório'], status:p['Status']
   };
@@ -2113,6 +2171,15 @@ function hasUnsavedChanges(){
   const idx = currentPostIdx;
   if(idx == null) return false;
   const modal = document.getElementById('modalBody');
+
+  const pubSelect = document.getElementById('editPubSelect');
+  if(pubSelect){
+    const originalPub = (getOriginalFieldText(idx, 'pub') || '').trim();
+    const existingSugPub = (suggestions[idx] && suggestions[idx]['pub']) ? suggestions[idx]['pub'].text : '';
+    const savedPub = existingSugPub || originalPub;
+    if(pubSelect.value !== savedPub) return true;
+  }
+
   const vals = modal.querySelectorAll('.val[data-key]');
   for(const el of vals){
     const key = el.getAttribute('data-key');
@@ -2147,7 +2214,7 @@ window.addEventListener('beforeunload', (e) => {
 
 // ---- Export / Import de sugestões ----
 const EXPORT_FIELD_LABELS = {
-  pub:'Público-alvo', dor:'Dor / Intenção', gancho:'Gancho', objetivo:'Objetivo do post',
+  titulo:'Título / Nome do segmento', pub:'Público-alvo', dor:'Dor / Intenção', gancho:'Gancho', objetivo:'Objetivo do post',
   estrutura:'Estrutura', textoArte:'Texto da arte', legenda:'Legenda / copy', cta:'CTA',
   prompt:'Prompt generativo de imagem', tom:'Tom obrigatório', status:'Status',
   reelsDuracao:'Duração (Reels)', reelsAbertura:'Abertura/gancho (Reels)', reelsRoteiro:'Roteiro falado (Reels)',
@@ -2155,7 +2222,7 @@ const EXPORT_FIELD_LABELS = {
 };
 
 function fieldKeysForPost(p){
-  const keys = ['pub','dor','gancho','objetivo','estrutura','textoArte','legenda','cta','prompt','tom','status'];
+  const keys = ['titulo','pub','dor','gancho','objetivo','estrutura','textoArte','legenda','cta','prompt','tom','status'];
   if(p['Formato']==='Reels' && reelsBySeg[p['Segmento/Página']]){
     keys.push('reelsDuracao','reelsAbertura','reelsRoteiro','reelsCta','reelsBroll');
   }
@@ -2320,7 +2387,7 @@ function importSuggestions(event){
 // Mapa chave interna -> nome do campo em `fields` (usado ao criar post novo, mesmo
 // esquema de campos que submitNewPost() usa para o formulário "Criar post").
 const NOVO_POST_FIELD_MAP = {
-  pub:'Público-alvo', dor:'Dor/Intenção', gancho:'Gancho', objetivo:'Objetivo do post',
+  titulo:'Segmento/Página', pub:'Público-alvo', dor:'Dor/Intenção', gancho:'Gancho', objetivo:'Objetivo do post',
   estrutura:'Estrutura', textoArte:'Texto da arte', legenda:'Legenda/copy', cta:'CTA',
   prompt:'Prompt generativo de imagem', tom:'Tom obrigatório', status:'Status'
 };
