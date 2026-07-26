@@ -2443,8 +2443,15 @@ async function parseImportedText(text){
       while(i < lines.length && lines[i] !== 'ORIGINAL:') i++;
       i++; // move past ORIGINAL:
       let originalLines = [];
-      while(i < lines.length && lines[i] !== 'SUGESTAO:'){ originalLines.push(lines[i]); i++; }
-      i++; // move past SUGESTAO:
+      // Aceita tanto "SUGESTAO:" quanto variações com autor, ex: "SUGESTAO (Allan):"
+      const sugTagRegex = /^SUGESTAO\s*(?:\(([^)]*)\))?\s*:$/;
+      let sugAuthor = null;
+      while(i < lines.length && !sugTagRegex.test(lines[i])){ originalLines.push(lines[i]); i++; }
+      if(i < lines.length){
+        const m = lines[i].match(sugTagRegex);
+        if(m && m[1]) sugAuthor = m[1].trim();
+        i++; // move past a linha SUGESTAO(...)
+      }
       let sugLines = [];
       while(i < lines.length && lines[i] !== '##FIM'){ sugLines.push(lines[i]); i++; }
       const sugText = sugLines.join('\n').trim();
@@ -2454,7 +2461,7 @@ async function parseImportedText(text){
           if(fieldLabel) novoPost.fields[fieldLabel] = sugText;
         } else {
           if(!suggestions[currentIdx]) suggestions[currentIdx] = {};
-          suggestions[currentIdx][key] = { text: sugText, editor: (currentUser ? currentUser.name : 'Importado (offline)'), editedAt: new Date().toISOString(), synced: false };
+          suggestions[currentIdx][key] = { text: sugText, editor: sugAuthor || (currentUser ? currentUser.name : 'Importado (offline)'), editedAt: new Date().toISOString(), synced: false };
         }
       }
       imported++;
