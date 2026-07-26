@@ -1281,6 +1281,7 @@ async function submitLoginPin(){
   document.getElementById('loginBackdrop').classList.remove('active');
   updateUserBadge();
   refreshPermissionDependentViews();
+  checarAvisoMensalLimpeza();
   const cb = pendingLoginCallback; pendingLoginCallback = null;
   if(cb) cb();
 }
@@ -2521,6 +2522,138 @@ async function parseImportedText(text){
   alert(msg);
 }
 
+// ---- Backup automático semanal + aviso mensal de limpeza (somente Allan) ----
+// Requer duas tabelas no Supabase (rodar uma vez no SQL editor do projeto):
+//
+//   create table if not exists calendar_backups (
+//     id uuid primary key default gen_random_uuid(),
+//     created_at timestamptz not null default now(),
+//     label text,
+//     data jsonb not null
+//   );
+//   create table if not exists app_settings (
+//     key text primary key,
+//     value text
+//   );
+//
+// (aplique as mesmas policies de RLS que já existem nas outras tabelas, se houver)
+
+const BACKUP_INTERVAL_DIAS = 7;
+const CLEANUP_PROMPT_INTERVAL_DIAS = 30;
+
+function diasDesde(dataIso){
+  if(!dataIso) return Infinity;
+  const diff = Date.now() - new Date(dataIso).getTime();
+  return diff / (1000 * 60 * 60 * 24);
+}
+
+// Cria um snapshot completo (posts, campanhas, kanban_stages) em calendar_backups.
+async function criarBackupCalendario(){
+  try{
+    const [postsRes, campanhasRes, stagesRes] = await Promise.all([
+      sb.from('posts').select('*'),
+      sb.from('campaigns').select('*'),
+      sb.from('kanban_stages').select('*')
+    ]);
+    const snapshot = {
+      posts: postsRes.data || [],
+      campaigns: campanhasRes.data || [],
+      kanban_stages: stagesRes.data || []
+    };
+    const agora = new Date();
+    const label = 'Backup automático ' + agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR');
+    const { error } = await sb.from('calendar_backups').insert({ label, data: snapshot });
+    if(error) console.warn('Falha ao criar backup semanal:', error);
+    else console.log('Backup semanal criado:', label);
+  }catch(e){ console.warn('Falha ao criar backup semanal:', e); }
+}
+
+// Roda a cada carregamento da página; só cria backup novo se o último tiver 7+ dias (ou não existir nenhum).
+async function checarBackupSemanal(){
+  try{
+    const { data, error } = await sb.from('calendar_backups').select('created_at').order('created_at', { ascending: false }).limit(1);
+    if(error){ console.warn('Falha ao checar último backup:', error); return; }
+    const ultimo = (data && data[0]) ? data[0].created_at : null;
+    if(diasDesde(ultimo) >= BACKUP_INTERVAL_DIAS){
+      await criarBackupCalendario();
+    }
+  }catch(e){ console.warn('Falha ao checar backup semanal:', e); }
+}
+
+async function getUltimoAvisoLimpeza(){
+  try{
+    const { data, error } = await sb.from('app_settings').select('value').eq('key', 'last_cleanup_prompt_at').maybeSingle();
+    if(error || !data) return null;
+    return data.value;
+  }catch(e){ return null; }
+}
+
+async function marcarAvisoLimpezaFeito(){
+  try{
+    await sb.from('app_settings').upsert({ key: 'last_cleanup_prompt_at', value: new Date().toISOString() });
+  }catch(e){ console.warn('Falha ao registrar aviso de limpeza:', e); }
+}
+
+// Só dispara para o Allan, e só se já se passaram 30+ dias desde o último aviso (ou nunca avisou).
+async function checarAvisoMensalLimpeza(){
+  if(!isAllan()) return;
+  const ultimoAviso = await getUltimoAvisoLimpeza();
+  if(diasDesde(ultimoAviso) < CLEANUP_PROMPT_INTERVAL_DIAS) return;
+  await abrirModalLimpezaBackups();
+}
+
+function toggleAllBackupChecks(v){
+  document.querySelectorAll('.backup-del-chk').forEach(el => { el.checked = v; });
+}
+
+async function abrirModalLimpezaBackups(){
+  const { data: backups, error } = await sb.from('calendar_backups').select('id, created_at, label').order('created_at', { ascending: false });
+  if(error){ console.warn('Falha ao listar backups:', error); return; }
+  const lista = backups || [];
+  const rowsHtml = lista.length ? lista.map(b => {
+    const quando = new Date(b.created_at).toLocaleString('pt-BR');
+    return `<label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px;">
+      <input type="checkbox" class="backup-del-chk" value="${b.id}">
+      ${escapeHtml(b.label || 'Backup')} — ${quando}
+    </label>`;
+  }).join('') : '<p style="font-size:13px;color:var(--muted-text,#666);">Nenhum backup salvo ainda.</p>';
+
+  openUtilModal(`
+    <h3>Limpeza de backups automáticos</h3>
+    <p style="font-size:13px;color:var(--muted-text,#666);margin-bottom:12px;">
+      São salvos backups automáticos do calendário a cada 7 dias. Existem ${lista.length} backup(s) no momento.
+      Selecione quais deseja apagar (ou nenhum, para manter todos).
+    </p>
+    ${lista.length ? `<div style="margin-bottom:8px;display:flex;gap:8px;">
+      <button type="button" onclick="toggleAllBackupChecks(true)" style="font-size:11.5px;border:1px solid var(--border);background:#fff;border-radius:6px;padding:3px 8px;cursor:pointer;">Selecionar todos</button>
+      <button type="button" onclick="toggleAllBackupChecks(false)" style="font-size:11.5px;border:1px solid var(--border);background:#fff;border-radius:6px;padding:3px 8px;cursor:pointer;">Nenhum</button>
+    </div>` : ''}
+    <div style="text-align:left;max-height:300px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px;">
+      ${rowsHtml}
+    </div>
+    <div class="btn-row" style="margin-top:14px;">
+      <button class="opt-cancel" onclick="dispensarLimpezaBackups()">Fechar sem apagar</button>
+      <button class="opt-primary" onclick="confirmarLimpezaBackups()">Apagar selecionados</button>
+    </div>
+  `);
+}
+
+async function dispensarLimpezaBackups(){
+  await marcarAvisoLimpezaFeito();
+  closeUtilModal();
+}
+
+async function confirmarLimpezaBackups(){
+  const ids = Array.from(document.querySelectorAll('.backup-del-chk:checked')).map(el => el.value);
+  if(ids.length){
+    const { error } = await sb.from('calendar_backups').delete().in('id', ids);
+    if(error){ alert('Erro ao apagar backups: ' + error.message); return; }
+  }
+  await marcarAvisoLimpezaFeito();
+  closeUtilModal();
+  showToast(ids.length ? `${ids.length} backup(s) apagado(s).` : 'Nenhum backup apagado.');
+}
+
 function setupScrollLock(){
   const ids = ['backdrop', 'utilBackdrop', 'loginBackdrop'];
   const check = () => {
@@ -2549,6 +2682,8 @@ function setupScrollLock(){
   renderLandingList(); // primeira visão: landing page
   updateSidebarActionState();
   checkDeepLink();
+  checarBackupSemanal();
+  checarAvisoMensalLimpeza(); // só faz algo se a sessão restaurada for do Allan
 })();
 </script>
 <div class="version-badge">v0.3.0</div>
