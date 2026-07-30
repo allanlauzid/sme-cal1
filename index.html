@@ -78,6 +78,8 @@
   .chip.active-reels{background:var(--reels); color:#fff; border-color:var(--reels);}
   select{padding:8px 10px; border:1px solid var(--border); border-radius:8px; font-size:13px; color:var(--text); background:#fff;}
   .legend-btn{border:1px solid var(--gold); background:#fff; color:#8a6300; padding:7px 14px; border-radius:20px; font-size:12.5px; font-weight:600; cursor:pointer;}
+  /* botão "Legenda" da Lista: mesmo formato, mas em tom cinza da paleta do site (em vez de amarelo/dourado) */
+  .legend-btn.legend-btn-gray{border-color:var(--border); background:#fff; color:var(--muted);}
 
   .legend-panel{display:none; background:#fffaf0; border:1px solid var(--gold-light); border-radius:12px; padding:14px 16px; margin-bottom:18px; font-size:12.5px; line-height:1.7;}
   .legend-panel.open{display:block;}
@@ -118,6 +120,9 @@
   .cal-dot.Stories{background:var(--stories);}
   .cal-dot.Feed{background:var(--feed);}
   .cal-dot.Reels{background:var(--reels);}
+  .cal-color-legend{display:flex; flex-wrap:wrap; gap:14px; align-items:center; margin-bottom:12px; padding:8px 12px; background:#f6f8fb; border:1px solid var(--border); border-radius:8px;}
+  .cal-color-legend-item{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted);}
+  .cal-color-legend-item .cal-dot{width:9px; height:9px;}
   .cal-day .more{font-size:10px; color:var(--muted);}
 
   /* AGENDA (mobile fallback for calendar) */
@@ -211,11 +216,14 @@
   #kanbanView{display:none; overflow-x:auto; padding-bottom:10px;}
   #kanbanView.active{display:block;}
   .kanban-board, #landingKanban{display:flex; gap:12px; align-items:flex-start;}
-  .kanban-col{background:#eef1f5; border-radius:12px; padding:10px; min-width:210px; flex:0 0 210px;}
-  .kanban-col-head{font-size:11.5px; font-weight:700; color:var(--navy); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;}
+  .kanban-col{--stage-color:var(--navy); background:#eef1f5; border-radius:12px; padding:10px; min-width:210px; flex:0 0 210px; box-shadow:inset 0 4px 0 var(--stage-color);}
+  .kanban-col-head{font-size:11.5px; font-weight:700; color:var(--navy); margin-bottom:8px; display:flex; justify-content:space-between; align-items:flex-start; gap:8px; padding-top:4px;}
+  .kanban-stage-group{display:block; font-size:9px; line-height:1.2; color:var(--muted); margin-bottom:3px; text-transform:uppercase; letter-spacing:.06em;}
+  .kanban-stage-title{display:block; line-height:1.3;}
   .kc-count{background:#fff; border-radius:10px; padding:1px 7px; font-size:10.5px; color:var(--muted);}
   .kanban-col-body{display:flex; flex-direction:column; gap:8px; min-height:40px;}
-  .kanban-card{background:#fff; border:1px solid var(--border); border-radius:10px; padding:9px 10px; cursor:grab; font-size:12px;}
+  .kanban-card{background:#fff; border:1px solid var(--border); border-radius:10px; padding:9px 10px; cursor:grab; font-size:12px; position:relative;}
+  .kanban-card.has-media-action{padding-right:48px; min-height:72px;}
   .kanban-card:hover{border-color:var(--gold);}
   .kc-seg{font-weight:700; color:var(--navy); margin-top:4px; font-size:12.5px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
   .kanban-col.is-empty{opacity:.55; min-width:130px; flex:0 0 130px;}
@@ -289,8 +297,25 @@
   .sidebar-offline .offline-menu.open{display:block;}
 
   /* Painel de filtros (aberto pelo botão Filtros da sidebar) */
-  .filters-panel{display:none; margin-bottom:18px;}
-  .filters-panel.open{display:block;}
+  /* aberto por padrão para qualquer usuário; a classe .closed permite fechar via botão Filtros */
+  .filters-panel{display:block; margin-bottom:18px;}
+  .filters-panel.closed{display:none;}
+  /* painel de Ferramentas: fechado por padrão; some acima do painel de Filtros e,
+     quando os dois estão abertos, fica "colado" nele (sem separação visual). */
+  .tools-panel{display:block; margin-bottom:0;}
+  .tools-panel.closed{display:none;}
+  .tools-box{align-items:center;}
+  .tools-box .tools-title{font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin-right:2px;}
+  /* botões de ícone do painel Ferramentas — a descrição some/aparece só no hover */
+  .tool-icon-btn{position:relative; border:1px solid var(--border); background:#fff; color:var(--navy); width:38px; height:38px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer;}
+  .tool-icon-btn svg{width:19px; height:19px;}
+  .tool-icon-btn:hover{border-color:var(--gold); color:var(--gold-light);}
+  .tool-icon-btn .tt{position:absolute; bottom:calc(100% + 9px); left:50%; transform:translateX(-50%); background:var(--navy); color:#fff; font-size:11.5px; font-weight:600; line-height:1.3; padding:6px 10px; border-radius:6px; white-space:nowrap; opacity:0; visibility:hidden; pointer-events:none; transition:opacity .15s ease; z-index:20;}
+  .tool-icon-btn .tt::after{content:""; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:5px solid transparent; border-top-color:var(--navy);}
+  .tool-icon-btn:hover .tt, .tool-icon-btn:focus-visible .tt{opacity:1; visibility:visible;}
+  .toolbar.fused-bottom{border-bottom:none; border-bottom-left-radius:0; border-bottom-right-radius:0; margin-bottom:0;}
+  .toolbar.fused-top{border-top:none; border-top-left-radius:0; border-top-right-radius:0;}
+  .only-blue-toggle{display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--muted); margin:2px 0 14px; user-select:none;}
 
   /* Correção: modal do post precisa cobrir o cabeçalho */
   .backdrop{z-index:var(--z-modal);}
@@ -319,14 +344,40 @@
   .review-dot-btn{display:inline-flex; line-height:0; border:none; background:none; padding:0; cursor:pointer; border-radius:50%;}
   .review-dot-btn:disabled{cursor:default;}
   .review-dot-btn:not(:disabled):hover{outline:2px solid var(--gold-light); outline-offset:2px;}
+  .review-dot-svg text{font-family:Arial,sans-serif; font-weight:800; fill:#111; pointer-events:none;}
 
   /* Badges nos cards da Lista */
   .list-badges{display:flex; flex-direction:column; align-items:center; gap:3px;}
   .pub-badge-outline{display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:50%; background:transparent; border:1px solid var(--navy); color:var(--navy); font-size:9px; font-weight:700;}
+  .stage-number-badge{display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%; background:var(--stage-color,var(--navy)); color:var(--stage-text,#fff); font-size:10px; font-weight:800;}
 
   /* Círculos de revisão, ao lado do tipo de post (card) / acima dele (modal) */
   .tag-with-dots{display:flex; align-items:center; gap:6px;}
   .dots-above-tag{display:flex; align-items:center; gap:6px; margin-bottom:6px;}
+
+  /* Ação lateral de mídia nos cards, disponível a partir da etapa 7 */
+  .post-card.has-media-action{position:relative; padding-right:58px; min-height:118px;}
+  .media-side-btn{position:absolute; top:-1px; right:-1px; bottom:-1px; width:46px; border:1px solid #111; border-radius:0 11px 11px 0; background:transparent; color:#d52b2b; font-size:27px; font-weight:500; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center;}
+  .kanban-card .media-side-btn{width:40px; border-radius:0 9px 9px 0; font-size:24px;}
+  .media-side-btn.has-media{background:var(--navy); border-color:var(--navy); color:var(--gold-light);}
+  .media-side-btn:hover{filter:brightness(.96);}
+  .media-side-btn:focus-visible{outline:3px solid rgba(214,154,42,.45); outline-offset:2px;}
+  .media-spec-box{background:#f4f7fb; border:1px solid var(--border); border-radius:10px; padding:11px 12px; margin:10px 0; text-align:left; color:var(--muted-text); font-size:12.5px; line-height:1.55;}
+  .media-dropzone{border:1.5px dashed var(--navy); border-radius:10px; padding:18px 14px; text-align:center; color:var(--navy); background:#fff; cursor:pointer;}
+  .media-dropzone.dragover{background:#eef4fc; border-color:var(--gold);}
+  .media-file-list{display:flex; flex-direction:column; gap:7px; margin-top:10px; text-align:left;}
+  .media-file-item{display:flex; align-items:center; justify-content:space-between; gap:10px; background:#f6f8fb; border-radius:8px; padding:8px 10px; font-size:11.5px; color:var(--muted-text);}
+  .media-file-item strong{color:var(--navy); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .media-error{color:#b3261e; font-size:12px; line-height:1.45; margin-top:8px; text-align:left;}
+  .media-existing{font-size:12px; color:var(--muted); margin:8px 0; text-align:left;}
+  .post-media-section{border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:14px 0; margin:14px 0;}
+  .post-media-section-head{display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:10px;}
+  .post-media-section-head h3{margin:0; color:var(--navy); font-size:14px;}
+  .post-media-manage{border:1px solid var(--navy); background:#fff; color:var(--navy); border-radius:8px; padding:7px 10px; font-size:11.5px; font-weight:700; cursor:pointer;}
+  .post-media-grid{display:flex; gap:10px; overflow-x:auto; padding-bottom:3px;}
+  .post-media-figure{margin:0; min-width:150px; max-width:220px;}
+  .post-media-figure img,.post-media-figure video{display:block; width:100%; max-height:260px; object-fit:contain; background:#eef1f5; border-radius:8px;}
+  .post-media-figure figcaption{font-size:10.5px; color:var(--muted); margin-top:5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -352,6 +403,7 @@
   </div>
   <button type="button" class="sidebar-btn" id="btnNovo" onclick="confirmNovo()"><svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg> Novo</button>
   <button type="button" class="sidebar-btn" id="btnFiltros" onclick="toggleFiltersPanel()"><img class="sidebar-icon" src="data:image/png;base64,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" alt=""> Filtros</button>
+  <button type="button" class="sidebar-btn" id="btnFerramentas" onclick="toggleToolsPanel()"><svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z"/></svg> Ferramentas</button>
   <input type="file" id="importFile" accept=".txt" style="display:none" onchange="importSuggestions(event)">
   <button type="button" class="sidebar-btn" id="btnLegislacao" onclick="window.location.href='legislacao.html'"><svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg> Legislação</button>
 </nav>
@@ -387,6 +439,20 @@
 
 <div class="wrap">
 
+  <div class="tools-panel closed" id="toolsPanel">
+    <div class="toolbar tools-box" id="toolsBox">
+      <span class="tools-title">Ferramentas</span>
+      <button type="button" class="tool-icon-btn" onclick="openMoveAllStageModal()" aria-label="Deslocar todos os posts para uma posição no Kanban">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.5h5.5v15h-5.5v-15zM10.75 4.5h5.5v9.5h-5.5v-9.5zM17.75 4.5h2.5v6h-2.5v-6z"/><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 16.5l2 2.25-2 2.25M22 18.75h-6"/></svg>
+        <span class="tt">Deslocar todos os posts para uma posição no Kanban</span>
+      </button>
+      <button type="button" class="tool-icon-btn" onclick="openApproveAllModal()" aria-label="Aprovar todos os posts">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l2.25 2.25L15 10.5m5.25 1.5a8.25 8.25 0 11-16.5 0 8.25 8.25 0 0116.5 0z"/></svg>
+        <span class="tt">Aprovar todos os posts</span>
+      </button>
+    </div>
+  </div>
+
   <div class="filters-panel" id="filtersPanel">
     <div class="toolbar">
       <label class="visually-hidden" for="searchBox">Buscar por segmento, gancho ou tema</label>
@@ -417,6 +483,11 @@
   </div>
 
   <div id="calView">
+    <div class="cal-color-legend">
+      <span class="cal-color-legend-item"><span class="cal-dot Stories"></span> Stories</span>
+      <span class="cal-color-legend-item"><span class="cal-dot Feed"></span> Feed</span>
+      <span class="cal-color-legend-item"><span class="cal-dot Reels"></span> Reels</span>
+    </div>
     <div id="calGridsContainer"></div>
     <div id="agendaView"></div>
   </div>
@@ -504,9 +575,38 @@ let state = { view: 'list', formatos: new Set(), pub: '', search: '' };
 
 // ---- Kanban ----
 const KANBAN_STAGES = [
-  'Em desenvolvimento', 'Pronto para Pedro revisar', 'Para ajustar #1', 'Pronto para Victor revisar',
-  'Para ajustar #2', 'Em revisão', 'Pronto para postar', 'Agendado', 'Publicado', 'Cancelado'
+  'Em desenvolvimento',
+  'Pronto para Pedro revisar texto',
+  'Para ajustar #1',
+  'Pronto para Victor revisar texto',
+  'Para ajustar #2',
+  'Em revisão do texto',
+  'Em desenvolvimento',
+  'Pronto para Pedro revisar mídia',
+  'Para ajustar #3',
+  'Pronto para Victor revisar mídia',
+  'Para ajustar #4',
+  'Em revisão da mídia',
+  'Pronto para postar',
+  'Agendado',
+  'Publicado',
+  'Cancelado'
 ];
+const KANBAN_STAGE_COLORS = [
+  '#65758B', '#D69A2A', '#9A5710', '#237643', '#C04A3B', '#315B8A',
+  '#7666C8', '#B58A00', '#AA4732', '#19764E', '#A83E72', '#3B6FA6',
+  '#07295F', '#7A55B4', '#26834A', '#8F3340'
+];
+function kanbanStageGroup(stage){
+  if(stage <= 6) return 'Texto';
+  if(stage <= 12) return 'Imagem / Vídeo';
+  return 'Post pronto';
+}
+function kanbanStageColor(stage){ return KANBAN_STAGE_COLORS[stage-1] || '#07295F'; }
+function kanbanStageTextColor(stage){ return stage === 2 || stage === 8 ? '#041F4A' : '#FFFFFF'; }
+function isTextStage(stage){ return stage >= 1 && stage <= 6; }
+function isMediaStage(stage){ return stage >= 7 && stage <= 12; }
+function isReadyStage(stage){ return stage >= 13; }
 const CAMPAIGN_STAGES = [
   'Em desenvolvimento', 'Pronto para análise', 'Em análise', 'Em revisão',
   'Pronto para postar', 'Em publicação', 'Publicado', 'Cancelado'
@@ -519,12 +619,12 @@ function computeCampaignStage(campaignId){
   const allEqual = v => stages.every(s => s === v);
   if(allEqual(1)) return 1;
   if(allEqual(2)) return 2;
-  if(allEqual(6)) return 4;
-  if(allEqual(7)) return 5;
-  if(allEqual(9)) return 7;
-  if(allEqual(10)) return 8;
-  if(stages.every(s => s === 8 || s === 9)) return 6;
-  if(stages.some(s => [2,3,4,5].includes(s))) return 3;
+  if(allEqual(6) || allEqual(12)) return 4;
+  if(allEqual(13)) return 5;
+  if(allEqual(15)) return 7;
+  if(allEqual(16)) return 8;
+  if(stages.every(s => s === 14 || s === 15)) return 6;
+  if(stages.some(s => s >= 2 && s <= 12)) return 3;
   return 3;
 }
 
@@ -572,18 +672,20 @@ function renderKanban(){
     const stage = i+1;
     const cards = (byStage[stage]||[]).map(idx => {
       const p = posts[idx];
-      return `<div class="kanban-card" style="${destaqueBorderStyle(p)}" draggable="true" ${CARD_KBD} ondragstart="kbDragStart(event, ${idx})" onclick="openPost(${idx})">
+      const mediaAction = stage >= 7;
+      return `<div class="kanban-card ${mediaAction?'has-media-action':''}" style="${destaqueBorderStyle(p)}" draggable="true" ${CARD_KBD} ondragstart="kbDragStart(event, ${idx})" onclick="openPost(${idx})">
         <div class="tag-with-dots">
           <span class="tag ${p['Formato']}">${p['Formato']}</span>
           ${reviewDotsHtml(idx, 24)}
         </div>
         <div class="kc-seg">${p['Segmento/Página']}</div>
         <div class="kc-date">${fmtDate(p['Data'])}</div>
+        ${mediaAction ? mediaButtonHtml(idx, p) : ''}
       </div>`;
     }).join('');
     const isEmpty = !(byStage[stage]||[]).length;
-    return `<div class="kanban-col ${isEmpty?'is-empty':''}" ondragover="event.preventDefault()" ondrop="kbDrop(event, ${stage})">
-      <div class="kanban-col-head"><span>${stage}. ${label}</span><span class="kc-count">${(byStage[stage]||[]).length}</span></div>
+    return `<div class="kanban-col ${isEmpty?'is-empty':''}" style="--stage-color:${kanbanStageColor(stage)}" ondragover="event.preventDefault()" ondrop="kbDrop(event, ${stage})">
+      <div class="kanban-col-head"><span><span class="kanban-stage-group">${kanbanStageGroup(stage)}</span><span class="kanban-stage-title">${stage}. ${label}</span></span><span class="kc-count">${(byStage[stage]||[]).length}</span></div>
       <div class="kanban-col-body">${cards || '<div class="kc-empty">Nenhum post nesta etapa</div>'}</div>
     </div>`;
   }).join('');
@@ -975,15 +1077,16 @@ function setLandingView(v){
   else renderLandingCal();
 }
 
-// ---- Revisão (um toggle on/off por post, por Pedro e por Victor) ----
-const REVIEW_FIELD_KEY = '_post';
+// ---- Revisão (texto e mídia, por Pedro e por Victor) ----
+const REVIEW_FIELD_KEY = '_post'; // compatibilidade: a revisão original passa a representar o texto
+const MEDIA_REVIEW_FIELD_KEY = '_post_media';
 const REVIEW_COLOR_PEDRO = '#EDFF24';
 const REVIEW_COLOR_VICTOR = '#43FF24';
 
 let allReviewData = {}; // { [postId]: { _post: { [userName]: 'ok'|'nao_revisado' } } } -- para os círculos
 
 async function loadAllReviewData(){
-  const { data, error } = await sb.from('post_field_review').select('post_id, field_key, user_name, state').eq('field_key', REVIEW_FIELD_KEY);
+  const { data, error } = await sb.from('post_field_review').select('post_id, field_key, user_name, state').in('field_key', [REVIEW_FIELD_KEY, MEDIA_REVIEW_FIELD_KEY]);
   if(error){ console.warn(error); return; }
   allReviewData = {};
   (data||[]).forEach(row => {
@@ -994,7 +1097,7 @@ async function loadAllReviewData(){
 }
 
 async function refreshReviewDataForPost(idx){
-  const { data, error } = await sb.from('post_field_review').select('field_key, user_name, state').eq('post_id', idx).eq('field_key', REVIEW_FIELD_KEY);
+  const { data, error } = await sb.from('post_field_review').select('field_key, user_name, state').eq('post_id', idx).in('field_key', [REVIEW_FIELD_KEY, MEDIA_REVIEW_FIELD_KEY]);
   if(error) return;
   const map = {};
   (data||[]).forEach(row => {
@@ -1006,62 +1109,87 @@ async function refreshReviewDataForPost(idx){
   if(state.view === 'kanban') renderKanban();
 }
 
-function isPostReviewed(idx, userName){
+function isPostReviewed(idx, userName, fieldKey){
   const d = allReviewData[idx];
-  return !!(d && d[REVIEW_FIELD_KEY] && d[REVIEW_FIELD_KEY][userName] === 'ok');
+  const key = fieldKey || REVIEW_FIELD_KEY;
+  return !!(d && d[key] && d[key][userName] === 'ok');
 }
 
-function reviewDotSvg(isOn, color, size){
+function reviewDotSvg(isOn, color, size, number){
   size = size || 10;
   const r = size/2 - 1.6;
   const cx = size/2, cy = size/2;
-  if(isOn) return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}"></circle></svg>`;
-  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="opacity:.4;"><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="3"></circle></svg>`;
+  const numberHtml = number ? `<text x="${cx}" y="${cy + size*.16}" text-anchor="middle" font-size="${size*.48}">${number}</text>` : '';
+  if(isOn) return `<svg class="review-dot-svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}"></circle>${numberHtml}</svg>`;
+  return `<svg class="review-dot-svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="opacity:.62;"><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="3"></circle>${numberHtml}</svg>`;
 }
 
 // versão só de exibição (cards de Lista e Kanban) — não clicável
 function reviewDotsHtml(idx, size){
-  const pedroOn = isPostReviewed(idx, 'Pedro Cavani');
-  const victorOn = isPostReviewed(idx, 'Victor Moraes');
-  const pedroTitle = (pedroOn?'Revisado':'Não revisado') + ' por Pedro Cavani';
-  const victorTitle = (victorOn?'Revisado':'Não revisado') + ' por Victor Moraes';
+  const stage = (posts[idx] && posts[idx].__kanban) || 2;
+  const pedroTextOn = stage >= 7 || isPostReviewed(idx, 'Pedro Cavani', REVIEW_FIELD_KEY);
+  const victorTextOn = stage >= 7 || isPostReviewed(idx, 'Victor Moraes', REVIEW_FIELD_KEY);
+  const pedroTextTitle = (pedroTextOn?'Texto revisado':'Texto não revisado') + ' por Pedro Cavani';
+  const victorTextTitle = (victorTextOn?'Texto revisado':'Texto não revisado') + ' por Victor Moraes';
+  if(stage < 7){
+    return `<span class="review-dots">
+      <span class="review-dot-wrap" title="${pedroTextTitle}">${reviewDotSvg(pedroTextOn, REVIEW_COLOR_PEDRO, size)}</span>
+      <span class="review-dot-wrap" title="${victorTextTitle}">${reviewDotSvg(victorTextOn, REVIEW_COLOR_VICTOR, size)}</span>
+    </span>`;
+  }
+  const pedroMediaOn = stage >= 13 || isPostReviewed(idx, 'Pedro Cavani', MEDIA_REVIEW_FIELD_KEY);
+  const victorMediaOn = stage >= 13 || isPostReviewed(idx, 'Victor Moraes', MEDIA_REVIEW_FIELD_KEY);
   return `<span class="review-dots">
-    <span class="review-dot-wrap" title="${pedroTitle}">${reviewDotSvg(pedroOn, REVIEW_COLOR_PEDRO, size)}</span>
-    <span class="review-dot-wrap" title="${victorTitle}">${reviewDotSvg(victorOn, REVIEW_COLOR_VICTOR, size)}</span>
+    <span class="review-dot-wrap" title="${pedroTextTitle}">${reviewDotSvg(pedroTextOn, REVIEW_COLOR_PEDRO, size, 1)}</span>
+    <span class="review-dot-wrap" title="${victorTextTitle}">${reviewDotSvg(victorTextOn, REVIEW_COLOR_VICTOR, size, 1)}</span>
+    <span class="review-dot-wrap" title="${pedroMediaOn?'Mídia revisada por Pedro Cavani':'Mídia não revisada por Pedro Cavani'}">${reviewDotSvg(pedroMediaOn, REVIEW_COLOR_PEDRO, size, 2)}</span>
+    <span class="review-dot-wrap" title="${victorMediaOn?'Mídia revisada por Victor Moraes':'Mídia não revisada por Victor Moraes'}">${reviewDotSvg(victorMediaOn, REVIEW_COLOR_VICTOR, size, 2)}</span>
   </span>`;
 }
 
 // versão clicável (só dentro do macro do post) — só o dono consegue clicar
 function reviewToggleButtonsHtml(idx, size){
-  const pedroOn = isPostReviewed(idx, 'Pedro Cavani');
-  const victorOn = isPostReviewed(idx, 'Victor Moraes');
-  const pedroTitle = (pedroOn?'Revisado':'Não revisado') + ' por Pedro Cavani';
-  const victorTitle = (victorOn?'Revisado':'Não revisado') + ' por Victor Moraes';
+  const stage = (posts[idx] && posts[idx].__kanban) || 2;
+  const pedroTextOn = stage >= 7 || isPostReviewed(idx, 'Pedro Cavani', REVIEW_FIELD_KEY);
+  const victorTextOn = stage >= 7 || isPostReviewed(idx, 'Victor Moraes', REVIEW_FIELD_KEY);
   const pedroClickable = currentUser && currentUser.name === 'Pedro Cavani';
   const victorClickable = currentUser && currentUser.name === 'Victor Moraes';
+  if(stage < 7){
+    return `<span class="review-dots">
+      <button type="button" class="review-dot-btn" title="${pedroTextOn?'Texto revisado por Pedro Cavani':'Texto não revisado por Pedro Cavani'}" ${pedroClickable?`onclick="togglePostReview(${idx}, 'Pedro Cavani', '${REVIEW_FIELD_KEY}')"`:'disabled'}>${reviewDotSvg(pedroTextOn, REVIEW_COLOR_PEDRO, size)}</button>
+      <button type="button" class="review-dot-btn" title="${victorTextOn?'Texto revisado por Victor Moraes':'Texto não revisado por Victor Moraes'}" ${victorClickable?`onclick="togglePostReview(${idx}, 'Victor Moraes', '${REVIEW_FIELD_KEY}')"`:'disabled'}>${reviewDotSvg(victorTextOn, REVIEW_COLOR_VICTOR, size)}</button>
+    </span>`;
+  }
+  const pedroMediaOn = stage >= 13 || isPostReviewed(idx, 'Pedro Cavani', MEDIA_REVIEW_FIELD_KEY);
+  const victorMediaOn = stage >= 13 || isPostReviewed(idx, 'Victor Moraes', MEDIA_REVIEW_FIELD_KEY);
+  const mediaPhaseOpen = stage <= 12;
   return `<span class="review-dots">
-    <button type="button" class="review-dot-btn" title="${pedroTitle}" ${pedroClickable?`onclick="togglePostReview(${idx}, 'Pedro Cavani')"`:'disabled'}>${reviewDotSvg(pedroOn, REVIEW_COLOR_PEDRO, size)}</button>
-    <button type="button" class="review-dot-btn" title="${victorTitle}" ${victorClickable?`onclick="togglePostReview(${idx}, 'Victor Moraes')"`:'disabled'}>${reviewDotSvg(victorOn, REVIEW_COLOR_VICTOR, size)}</button>
+    <button type="button" class="review-dot-btn" title="Texto revisado por Pedro Cavani" disabled>${reviewDotSvg(true, REVIEW_COLOR_PEDRO, size, 1)}</button>
+    <button type="button" class="review-dot-btn" title="Texto revisado por Victor Moraes" disabled>${reviewDotSvg(true, REVIEW_COLOR_VICTOR, size, 1)}</button>
+    <button type="button" class="review-dot-btn" title="${pedroMediaOn?'Mídia revisada por Pedro Cavani':'Mídia não revisada por Pedro Cavani'}" ${(pedroClickable&&mediaPhaseOpen)?`onclick="togglePostReview(${idx}, 'Pedro Cavani', '${MEDIA_REVIEW_FIELD_KEY}')"`:'disabled'}>${reviewDotSvg(pedroMediaOn, REVIEW_COLOR_PEDRO, size, 2)}</button>
+    <button type="button" class="review-dot-btn" title="${victorMediaOn?'Mídia revisada por Victor Moraes':'Mídia não revisada por Victor Moraes'}" ${(victorClickable&&mediaPhaseOpen)?`onclick="togglePostReview(${idx}, 'Victor Moraes', '${MEDIA_REVIEW_FIELD_KEY}')"`:'disabled'}>${reviewDotSvg(victorMediaOn, REVIEW_COLOR_VICTOR, size, 2)}</button>
   </span>`;
 }
 
-async function togglePostReview(idx, userName){
+async function togglePostReview(idx, userName, fieldKey){
   if(!currentUser || currentUser.name !== userName){
     alert('Você não pode alterar essa marcação — ela pertence a outro usuário.');
     return;
   }
-  const turningOn = !isPostReviewed(idx, userName);
+  const key = fieldKey || REVIEW_FIELD_KEY;
+  const label = key === MEDIA_REVIEW_FIELD_KEY ? 'mídia' : 'texto';
+  const turningOn = !isPostReviewed(idx, userName, key);
   const msg = turningOn
-    ? `Confirma a mudança para "Revisado por ${userName}"?`
-    : `Confirma a mudança para "Não revisado por ${userName}"?`;
+    ? `Confirma a mudança para "${label} revisado por ${userName}"?`
+    : `Confirma a mudança para "${label} não revisado por ${userName}"?`;
   if(!confirm(msg)) return;
   const newState = turningOn ? 'ok' : 'nao_revisado';
   try{
     await sb.from('post_field_review').upsert(
-      { post_id: idx, field_key: REVIEW_FIELD_KEY, user_id: currentUser.id, user_name: userName, state: newState },
+      { post_id: idx, field_key: key, user_id: currentUser.id, user_name: userName, state: newState },
       { onConflict: 'post_id,field_key,user_name' }
     );
-    await sb.from('audit_log').insert({ post_id: idx, user_id: currentUser.id, user_name: currentUser.name, action_type: 'review_change', field_key: REVIEW_FIELD_KEY, to_value: newState });
+    await sb.from('audit_log').insert({ post_id: idx, user_id: currentUser.id, user_name: currentUser.name, action_type: 'review_change', field_key: key, to_value: newState });
   }catch(e){ console.warn(e); }
   await refreshReviewDataForPost(idx);
   if(currentPostIdx === idx && document.getElementById('backdrop').classList.contains('active')) renderPostModal();
@@ -1084,6 +1212,11 @@ function persistSuggestions(){ try{ localStorage.setItem(SUG_KEY, JSON.stringify
 let editMode = false;
 let currentPostIdx = null;
 
+// ---- Filtro "somente tópicos em azul" dentro do post ----
+// padrão: marcado para Victor Moraes, desmarcado para Pedro Cavani e Allan Lauzid (e visitante).
+let onlyBlueMode = false;
+function defaultOnlyBlueForUser(name){ return name === 'Victor Moraes'; }
+
 // ---- Login / identificação do usuário ----
 const CURRENT_USER_KEY = 'sme_current_user_v1';
 let currentUser = null; // {id, name}
@@ -1100,6 +1233,7 @@ function tryRestoreSession(){
     currentUser = null;
     try{ sessionStorage.removeItem(CURRENT_USER_KEY); }catch(e){}
   }
+  onlyBlueMode = defaultOnlyBlueForUser(currentUser && currentUser.name);
 }
 
 function updateUserBadge(){
@@ -1174,8 +1308,30 @@ function sidebarHoverLeave(){
 }
 
 function toggleFiltersPanel(){
-  document.getElementById('filtersPanel').classList.toggle('open');
+  document.getElementById('filtersPanel').classList.toggle('closed');
+  updatePanelsFusion();
   closeSidebar();
+}
+
+function toggleToolsPanel(){
+  document.getElementById('toolsPanel').classList.toggle('closed');
+  updatePanelsFusion();
+  closeSidebar();
+}
+
+// quando Ferramentas e Filtros estão os dois abertos, os painéis ficam colados
+// (sem espaço nem borda entre eles); ordem sempre Ferramentas acima de Filtros.
+function updatePanelsFusion(){
+  const toolsPanel = document.getElementById('toolsPanel');
+  const filtersPanel = document.getElementById('filtersPanel');
+  if(!toolsPanel || !filtersPanel) return;
+  const toolsOpen = !toolsPanel.classList.contains('closed');
+  const filtersOpen = !filtersPanel.classList.contains('closed');
+  const fuse = toolsOpen && filtersOpen;
+  const toolsBox = toolsPanel.querySelector('.toolbar');
+  const filtersBox = filtersPanel.querySelector('.toolbar');
+  if(toolsBox) toolsBox.classList.toggle('fused-bottom', fuse);
+  if(filtersBox) filtersBox.classList.toggle('fused-top', fuse);
 }
 
 // ---- Sessão expira em 1h ----
@@ -1278,6 +1434,7 @@ async function submitLoginPin(){
   }
   currentUser = { id: data, name: loginSelectedName, loginAt: Date.now() };
   try{ sessionStorage.setItem(CURRENT_USER_KEY, JSON.stringify(currentUser)); }catch(e){}
+  onlyBlueMode = defaultOnlyBlueForUser(currentUser.name);
   document.getElementById('loginBackdrop').classList.remove('active');
   updateUserBadge();
   refreshPermissionDependentViews();
@@ -1327,6 +1484,7 @@ function logoutUser(){
   if(!confirm('Sair da identificação atual?')) return;
   currentUser = null;
   isGuest = false;
+  onlyBlueMode = false;
   try{ sessionStorage.removeItem(CURRENT_USER_KEY); }catch(e){}
   updateUserBadge();
   backToLanding();
@@ -1407,6 +1565,134 @@ async function submitNewStage(){
   closeUtilModal();
   if(state.view === 'kanban') renderKanban();
   showToast('Posição criada com sucesso.');
+}
+
+// ---- Ferramentas: ações em massa sobre todos os posts da campanha atual ----
+// (menu lateral > Ferramentas — cada ação pede confirmação e a senha/PIN do usuário)
+function campaignPosts(){
+  return posts.filter(p => p && p.__campaignId === currentCampaignId);
+}
+
+async function verifyCurrentUserPin(pin){
+  if(!currentUser || !pin) return false;
+  try{
+    const { data, error } = await sb.rpc('verify_login', { p_name: currentUser.name, p_pin: pin });
+    return !error && !!data;
+  }catch(e){ return false; }
+}
+
+function openMoveAllStageModal(){
+  requireLogin(() => {
+    const campPosts = campaignPosts();
+    if(!campPosts.length){ alert('Não há posts nesta campanha para deslocar.'); return; }
+    const stageOptions = KANBAN_STAGES.map((lbl,i)=>`<option value="${i+1}">${i+1}. ${lbl}</option>`).join('');
+    openUtilModal(`
+      <h3>Deslocar todos os posts</h3>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:10px;text-align:left;">Isso vai mover os ${campPosts.length} post(s) desta campanha para a posição escolhida do Kanban.</p>
+      <select id="toolsStageSelect" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:13px;">${stageOptions}</select>
+      <label style="font-size:11.5px;color:var(--muted);display:block;text-align:left;">Confirme sua senha (PIN)<br>
+        <input type="password" id="toolsPinMove" inputmode="numeric" maxlength="4" placeholder="••••" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-top:4px;letter-spacing:4px;text-align:center;">
+      </label>
+      <div class="login-error" id="toolsMoveError" aria-live="polite" style="text-align:left;display:none;">PIN incorreto. Tente novamente.</div>
+      <div class="btn-row" style="margin-top:10px;">
+        <button class="opt-cancel" onclick="closeUtilModal()">Cancelar</button>
+        <button class="opt-primary" onclick="submitMoveAllStage()">Confirmar deslocamento</button>
+      </div>
+    `);
+  });
+}
+
+async function submitMoveAllStage(){
+  const stage = parseInt(document.getElementById('toolsStageSelect').value, 10);
+  const pin = document.getElementById('toolsPinMove').value.trim();
+  const ok = await verifyCurrentUserPin(pin);
+  if(!ok){ document.getElementById('toolsMoveError').style.display = 'block'; return; }
+  const campPosts = campaignPosts();
+  if(!confirm(`Confirma deslocar TODOS os ${campPosts.length} post(s) desta campanha para "${KANBAN_STAGES[stage-1]}"?`)) return;
+  for(const p of campPosts){
+    const idx = p.__id;
+    const oldStage = p.__kanban || 2;
+    if(oldStage === stage) continue;
+    p.__kanban = stage;
+    try{
+      await sb.from('posts').update({ kanban_stage: stage }).eq('id', idx);
+      await sb.from('audit_log').insert({ post_id: idx, user_id: currentUser.id, user_name: currentUser.name, action_type: 'kanban_move_bulk', field_key: null, from_value: String(oldStage), to_value: String(stage) });
+    }catch(e){ console.warn(e); }
+  }
+  closeUtilModal();
+  if(state.view === 'kanban') renderKanban();
+  if(state.view === 'list') renderList();
+  if(state.view === 'cal') renderCalendar();
+  if(document.getElementById('backdrop').classList.contains('active')) renderPostModal();
+  showToast('Posts deslocados com sucesso.');
+}
+
+function openApproveAllModal(){
+  requireLogin(() => {
+    if(!currentUser || (currentUser.name !== 'Pedro Cavani' && currentUser.name !== 'Victor Moraes')){
+      alert('Somente Pedro Cavani ou Victor Moraes podem aprovar posts em massa.');
+      return;
+    }
+    const campPosts = campaignPosts();
+    const actionable = campPosts.filter(p => isTextStage(p.__kanban || 2) || isMediaStage(p.__kanban || 2));
+    if(!actionable.length){ alert('Não há posts nas etapas de texto ou mídia para aprovar.'); return; }
+    const cor = currentUser.name === 'Pedro Cavani' ? 'amarelo' : 'verde';
+    const textCount = actionable.filter(p => isTextStage(p.__kanban || 2)).length;
+    const mediaCount = actionable.filter(p => isMediaStage(p.__kanban || 2)).length;
+    openUtilModal(`
+      <h3>Aprovar todos os posts</h3>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:10px;text-align:left;">${currentUser.name} preencherá a bolinha ${cor} correspondente à fase de cada post. Texto: ${textCount} post(s). Mídia: ${mediaCount} post(s). Posts prontos não serão alterados.</p>
+      <label style="font-size:11.5px;color:var(--muted);display:block;text-align:left;">Confirme sua senha (PIN)<br>
+        <input type="password" id="toolsPinApprove" inputmode="numeric" maxlength="4" placeholder="••••" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-top:4px;letter-spacing:4px;text-align:center;">
+      </label>
+      <div class="login-error" id="toolsApproveError" aria-live="polite" style="text-align:left;display:none;">PIN incorreto. Tente novamente.</div>
+      <div class="btn-row" style="margin-top:10px;">
+        <button class="opt-cancel" onclick="closeUtilModal()">Cancelar</button>
+        <button class="opt-primary" onclick="submitApproveAll()">Confirmar aprovação</button>
+      </div>
+    `);
+  });
+}
+
+function bulkApprovalTarget(userName, stage){
+  if(isTextStage(stage)){
+    return { reviewKey:REVIEW_FIELD_KEY, targetStage:userName === 'Pedro Cavani' ? 4 : 6 };
+  }
+  if(isMediaStage(stage)){
+    return { reviewKey:MEDIA_REVIEW_FIELD_KEY, targetStage:userName === 'Pedro Cavani' ? 10 : 12 };
+  }
+  return null;
+}
+
+async function submitApproveAll(){
+  const pin = document.getElementById('toolsPinApprove').value.trim();
+  const ok = await verifyCurrentUserPin(pin);
+  if(!ok){ document.getElementById('toolsApproveError').style.display = 'block'; return; }
+  const campPosts = campaignPosts().filter(p => isTextStage(p.__kanban || 2) || isMediaStage(p.__kanban || 2));
+  if(!confirm(`Confirma aprovar os ${campPosts.length} post(s) que estão nas fases de texto ou mídia como ${currentUser.name}?`)) return;
+  for(const p of campPosts){
+    const idx = p.__id;
+    const oldStage = p.__kanban || 2;
+    const target = bulkApprovalTarget(currentUser.name, oldStage);
+    if(!target) continue;
+    const reviewKey = target.reviewKey;
+    const targetStage = target.targetStage;
+    try{
+      await sb.from('post_field_review').upsert(
+        { post_id: idx, field_key: reviewKey, user_id: currentUser.id, user_name: currentUser.name, state: 'ok' },
+        { onConflict: 'post_id,field_key,user_name' }
+      );
+      await sb.from('posts').update({ kanban_stage: targetStage }).eq('id', idx);
+      p.__kanban = targetStage;
+      await sb.from('audit_log').insert({ post_id: idx, user_id: currentUser.id, user_name: currentUser.name, action_type: 'review_change_bulk', field_key: reviewKey, from_value: String(oldStage), to_value: `ok;stage=${targetStage}` });
+    }catch(e){ console.warn(e); }
+  }
+  await loadAllReviewData();
+  closeUtilModal();
+  if(state.view === 'kanban') renderKanban();
+  if(state.view === 'list') renderList();
+  if(document.getElementById('backdrop').classList.contains('active')) renderPostModal();
+  showToast('Posts aprovados com sucesso.');
 }
 
 // legend
@@ -1558,7 +1844,7 @@ function renderList(){
   const dates = Object.keys(byDate).sort();
   const addBtnHtml = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
     <button type="button" class="legend-btn" id="btnAddPostList" onclick="openNewPostModal()" title="Somente Allan pode criar posts">+ Criar post</button>
-    <button type="button" class="legend-btn" onclick="abrirLegendaModal()">Legenda</button>
+    <button type="button" class="legend-btn legend-btn-gray" onclick="abrirLegendaModal()">Legenda</button>
   </div>`;
   if(!dates.length){ container.innerHTML = addBtnHtml + '<p style="color:#66758A;padding:20px 0;">Nenhum post encontrado com esses filtros.</p>'; updatePermissionUI(); return; }
   container.innerHTML = addBtnHtml + dates.map(date => {
@@ -1573,21 +1859,209 @@ function postCardHtml(p){
   const letter = pubLabel[p['Público-alvo']] || '';
   const idx = posts.indexOf(p);
   const stage = p.__kanban || 2;
-  return `<div class="post-card" style="${destaqueBorderStyle(p)}" ${CARD_KBD} onclick="openPost(${idx})">
+  const mediaAction = stage >= 7;
+  return `<div class="post-card ${mediaAction?'has-media-action':''}" style="${destaqueBorderStyle(p)}" ${CARD_KBD} onclick="openPost(${idx})">
     <div class="row1">
       <div class="tag-with-dots">
         <span class="tag ${p['Formato']}">${p['Formato']}</span>
         ${reviewDotsHtml(idx, 24)}
       </div>
       <div class="list-badges">
-        <span class="pub-badge" title="${KANBAN_STAGES[stage-1]}">${stage}</span>
+        <span class="stage-number-badge" style="--stage-color:${kanbanStageColor(stage)};--stage-text:${kanbanStageTextColor(stage)}" title="${KANBAN_STAGES[stage-1]}">${stage}</span>
         <span class="pub-badge-outline" title="${p['Público-alvo'] || 'Público-alvo não definido'}">${letter}</span>
       </div>
     </div>
     <div class="seg">${p['Segmento/Página']}</div>
     <div class="gancho">${p['Gancho']}</div>
     <div class="foot"><span>${p['Semana']}</span><span>Ver detalhes →</span></div>
+    ${mediaAction ? mediaButtonHtml(idx, p) : ''}
   </div>`;
+}
+
+// ---- Mídias do post (imagens, carrosséis e vídeos) ----
+const POST_MEDIA_BUCKET = 'post-media';
+let pendingMediaFiles = [];
+const MEDIA_SPECS = {
+  Stories:{ label:'Stories', description:'IMAGEM ou VÍDEO · 9:16 · até 1080 × 1920 px', ratios:[{label:'9:16',value:9/16,maxWidth:1080,maxHeight:1920}], multiple:false },
+  Feed:{ label:'Feed', description:'IMAGEM ou VÍDEO · 4:5 (até 1080 × 1350), 1:1 (até 1080 × 1080) ou 1.91:1 (até 1080 × 566)', ratios:[{label:'4:5',value:4/5,maxWidth:1080,maxHeight:1350},{label:'1:1',value:1,maxWidth:1080,maxHeight:1080},{label:'1.91:1',value:1080/566,maxWidth:1080,maxHeight:566}], multiple:true },
+  Reels:{ label:'Reels', description:'IMAGEM ou VÍDEO · 9:16 · até 1080 × 1920 px', ratios:[{label:'9:16',value:9/16,maxWidth:1080,maxHeight:1920}], multiple:false }
+};
+
+function postMediaList(p){
+  const raw = p && p['Mídias'];
+  if(Array.isArray(raw)) return raw;
+  if(typeof raw === 'string' && raw.trim()){
+    try{ const parsed = JSON.parse(raw); return Array.isArray(parsed) ? parsed : []; }catch(e){}
+  }
+  return [];
+}
+function hasPostMedia(p){ return postMediaList(p).length > 0; }
+function mediaButtonHtml(idx, p){
+  const hasMedia = hasPostMedia(p);
+  const label = hasMedia ? 'Substituir mídia anexada' : 'Adicionar mídia';
+  return `<button type="button" class="media-side-btn ${hasMedia?'has-media':''}" onclick="event.stopPropagation(); openMediaModal(${idx})" aria-label="${label}" title="${label}">+</button>`;
+}
+function safeMediaUrl(url){
+  try{
+    const parsed = new URL(url, location.href);
+    return (parsed.protocol === 'http:' || parsed.protocol === 'https:') ? escapeHtml(parsed.href) : '';
+  }catch(e){ return ''; }
+}
+function postMediaPreviewHtml(idx,p){
+  if((p.__kanban || 2) < 7) return '';
+  const media = postMediaList(p);
+  const items = media.map(item => {
+    const url = safeMediaUrl(item.url);
+    if(!url) return '';
+    const visual = (item.type||'').startsWith('video/') ? `<video src="${url}" controls preload="metadata"></video>` : `<img src="${url}" alt="${escapeHtml(item.name||'Mídia do post')}" loading="lazy">`;
+    return `<figure class="post-media-figure">${visual}<figcaption>${escapeHtml(item.name||'Mídia')} · ${escapeHtml(item.ratio||'')}</figcaption></figure>`;
+  }).join('');
+  return `<section class="post-media-section">
+    <div class="post-media-section-head"><h3>Imagem / Vídeo</h3><button type="button" class="post-media-manage" onclick="openMediaModal(${idx})">${media.length?'Substituir mídia':'Adicionar mídia'}</button></div>
+    ${media.length ? `<div class="post-media-grid">${items}</div>` : `<div class="media-existing">Nenhuma mídia anexada. ${(MEDIA_SPECS[p['Formato']]||MEDIA_SPECS.Feed).description}</div>`}
+  </section>`;
+}
+function mediaSpecHtml(format){
+  const spec = MEDIA_SPECS[format] || MEDIA_SPECS.Feed;
+  return `<div class="media-spec-box"><strong>${spec.label}</strong><br>${spec.description}${spec.multiple?'<br>Para carrossel, todos os arquivos selecionados devem usar a mesma proporção.':''}</div>`;
+}
+
+function openMediaModal(idx){
+  requireLogin(() => {
+    const p = posts[idx];
+    if(!p || (p.__kanban || 2) < 7){ alert('A mídia fica disponível a partir da etapa 7 - Em desenvolvimento.'); return; }
+    pendingMediaFiles = [];
+    const spec = MEDIA_SPECS[p['Formato']] || MEDIA_SPECS.Feed;
+    const existing = postMediaList(p);
+    openUtilModal(`
+      <h3>${existing.length ? 'Substituir mídia' : 'Adicionar mídia'}</h3>
+      ${mediaSpecHtml(p['Formato'])}
+      ${existing.length ? `<div class="media-existing">Mídia atual: ${existing.length} arquivo(s). Ao salvar, a seleção abaixo substituirá a mídia atual.</div>` : ''}
+      <div class="media-dropzone" id="mediaDropzone" role="button" tabindex="0">Clique ou arraste ${spec.multiple?'uma ou mais imagens/vídeos':'uma imagem ou um vídeo'} aqui</div>
+      <input type="file" id="mediaFileInput" accept="image/*,video/*" ${spec.multiple?'multiple':''} style="display:none">
+      <div id="mediaValidationMessage" class="media-error" aria-live="polite"></div>
+      <div id="mediaFileList" class="media-file-list"></div>
+      <div class="btn-row" style="margin-top:14px;">
+        <button class="opt-cancel" onclick="closeUtilModal()">Cancelar</button>
+        <button class="opt-primary" id="saveMediaBtn" onclick="savePostMedia(${idx})" disabled>Salvar mídia</button>
+      </div>
+    `);
+    setupMediaDropzone(idx);
+  });
+}
+
+function setupMediaDropzone(idx){
+  const zone = document.getElementById('mediaDropzone');
+  const input = document.getElementById('mediaFileInput');
+  if(!zone || !input) return;
+  const choose = () => input.click();
+  zone.addEventListener('click', choose);
+  zone.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); choose(); } });
+  input.addEventListener('change', e => validateMediaSelection(idx, Array.from(e.target.files || [])));
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); validateMediaSelection(idx, Array.from(e.dataTransfer.files || [])); });
+}
+function formatFileSize(bytes){
+  return bytes < 1024*1024 ? `${Math.max(1,Math.round(bytes/1024))} KB` : `${(bytes/(1024*1024)).toFixed(1)} MB`;
+}
+function inspectMediaDimensions(file){
+  return new Promise((resolve,reject) => {
+    const url = URL.createObjectURL(file);
+    const done = (width,height) => { URL.revokeObjectURL(url); width&&height ? resolve({width,height}) : reject(new Error('Não foi possível identificar as dimensões.')); };
+    if(file.type.startsWith('image/')){
+      const img = new Image();
+      img.onload = () => done(img.naturalWidth,img.naturalHeight);
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Imagem inválida ou não suportada.')); };
+      img.src = url;
+    }else if(file.type.startsWith('video/')){
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      video.onloadedmetadata = () => done(video.videoWidth,video.videoHeight);
+      video.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Vídeo inválido ou codec não suportado pelo navegador.')); };
+      video.src = url;
+    }else{
+      URL.revokeObjectURL(url);
+      reject(new Error('Selecione somente imagem ou vídeo.'));
+    }
+  });
+}
+function matchingMediaRatio(format,width,height){
+  const spec = MEDIA_SPECS[format] || MEDIA_SPECS.Feed;
+  const actual = width/height;
+  return spec.ratios.find(r => Math.abs(actual-r.value)/r.value <= .015) || null;
+}
+async function validateMediaSelection(idx,files){
+  const p = posts[idx];
+  const spec = MEDIA_SPECS[p['Formato']] || MEDIA_SPECS.Feed;
+  const message = document.getElementById('mediaValidationMessage');
+  const list = document.getElementById('mediaFileList');
+  const saveBtn = document.getElementById('saveMediaBtn');
+  pendingMediaFiles = [];
+  message.textContent = '';
+  list.innerHTML = '';
+  saveBtn.disabled = true;
+  if(!files.length) return;
+  if(!spec.multiple && files.length > 1){ message.textContent = `${p['Formato']} aceita um arquivo por post. Selecione somente uma imagem ou um vídeo.`; return; }
+  const accepted = [], errors = [];
+  for(const file of files){
+    try{
+      if(!file.type.startsWith('image/') && !file.type.startsWith('video/')) throw new Error('tipo de arquivo não permitido');
+      const dims = await inspectMediaDimensions(file);
+      const ratio = matchingMediaRatio(p['Formato'],dims.width,dims.height);
+      if(!ratio) throw new Error(`proporção ${dims.width}:${dims.height} incompatível com ${p['Formato']}`);
+      if(dims.width > ratio.maxWidth || dims.height > ratio.maxHeight) throw new Error(`dimensões ${dims.width} × ${dims.height} excedem o máximo de ${ratio.maxWidth} × ${ratio.maxHeight}`);
+      accepted.push({file,width:dims.width,height:dims.height,ratio:ratio.label});
+    }catch(error){ errors.push(`${file.name}: ${error.message}`); }
+  }
+  if(spec.multiple && accepted.length > 1 && new Set(accepted.map(item => item.ratio)).size > 1) errors.push('Todos os arquivos do carrossel devem usar a mesma proporção.');
+  if(errors.length){ message.innerHTML = errors.map(error => `• ${escapeHtml(error)}`).join('<br>'); return; }
+  pendingMediaFiles = accepted;
+  list.innerHTML = accepted.map(item => `<div class="media-file-item"><strong>${escapeHtml(item.file.name)}</strong><span>${item.file.type.startsWith('video/')?'Vídeo':'Imagem'} · ${item.width} × ${item.height} · ${item.ratio} · ${formatFileSize(item.file.size)}</span></div>`).join('');
+  saveBtn.disabled = false;
+}
+function storageSafeName(name){
+  const dot = name.lastIndexOf('.');
+  const ext = dot >= 0 ? name.slice(dot).toLowerCase().replace(/[^a-z0-9.]/g,'') : '';
+  const base = (dot>=0?name.slice(0,dot):name).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]+/g,'-').replace(/^-+|-+$/g,'') || 'midia';
+  return `${base.slice(0,60)}${ext}`;
+}
+async function savePostMedia(idx){
+  if(!pendingMediaFiles.length) return;
+  const p = posts[idx];
+  const btn = document.getElementById('saveMediaBtn');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  const uploaded = [];
+  try{
+    for(let i=0;i<pendingMediaFiles.length;i++){
+      const item = pendingMediaFiles[i];
+      const token = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      const path = `${p.__campaignId}/${idx}/${token}-${i+1}-${storageSafeName(item.file.name)}`;
+      const {error} = await sb.storage.from(POST_MEDIA_BUCKET).upload(path,item.file,{contentType:item.file.type,upsert:false});
+      if(error) throw error;
+      const {data} = sb.storage.from(POST_MEDIA_BUCKET).getPublicUrl(path);
+      uploaded.push({name:item.file.name,type:item.file.type,url:data.publicUrl,path,width:item.width,height:item.height,ratio:item.ratio,uploadedAt:new Date().toISOString()});
+    }
+    const oldMedia = postMediaList(p);
+    const fields = {...p,'Mídias':uploaded};
+    delete fields.__id; delete fields.__kanban; delete fields.__campaignId;
+    const {error:updateError} = await sb.from('posts').update({fields}).eq('id',idx);
+    if(updateError) throw updateError;
+    const oldPaths = oldMedia.map(item => item.path).filter(Boolean);
+    if(oldPaths.length) await sb.storage.from(POST_MEDIA_BUCKET).remove(oldPaths);
+    try{ await sb.from('audit_log').insert({post_id:idx,user_id:currentUser.id,user_name:currentUser.name,action_type:'media_replace',field_key:'Mídias',to_value:`${uploaded.length} arquivo(s)`}); }catch(e){}
+    await loadPostsFromSupabase();
+    closeUtilModal();
+    renderAll();
+    if(document.getElementById('backdrop').classList.contains('active') && currentPostIdx===idx) renderPostModal();
+    showToast(uploaded.length>1?'Mídias salvas no carrossel.':'Mídia salva.');
+  }catch(error){
+    if(uploaded.length) await sb.storage.from(POST_MEDIA_BUCKET).remove(uploaded.map(item=>item.path));
+    console.warn(error);
+    const message = document.getElementById('mediaValidationMessage');
+    if(message) message.textContent = error && /bucket|not found/i.test(error.message||'') ? 'O armazenamento de mídia ainda não foi configurado. Aplique o arquivo SUPABASE_MEDIA_SETUP.sql no Supabase e tente novamente.' : `Não foi possível salvar a mídia: ${error.message||'erro desconhecido'}`;
+    btn.disabled = false; btn.textContent = 'Salvar mídia';
+  }
 }
 
 const MONTHS = [
@@ -1667,6 +2141,7 @@ function isAttentionField(key){
 // não houver público definido) e, para o Allan em modo de edição, um <select> com as
 // opções — a letra dentro da bolinha é atualizada ao vivo conforme ele escolhe.
 function renderPublicoAlvoField(idx, p, letterAtual){
+  if(onlyBlueMode) return '';
   const atual = p['Público-alvo'] || '';
   const sug = (suggestions[idx] && suggestions[idx]['pub']) ? suggestions[idx]['pub'] : null;
   const valorEfetivo = sug ? sug.text : atual;
@@ -1699,7 +2174,18 @@ function atualizarPreviewPub(){
   badge.title = sel.value || 'Público-alvo não definido';
 }
 
+// campos que sempre aparecem em tom azul (mesma paleta do .attention), independente
+// de serem "campo de atenção" do formato: CTA e Legenda/copy, em qualquer tipo de post.
+const BLUE_TONE_FIELDS = ['cta', 'legenda', 'reelsCta'];
+
+// campo 'Status' foi removido da visualização de posts para todos os usuários; e o
+// 'Prompt generativo de imagem' só aparece para o Allan (Victor e Pedro não veem).
 function field(label, value, key){
+  if(key === 'status') return '';
+  if(key === 'prompt' && !isAllan()) return '';
+  const blueTone = key && BLUE_TONE_FIELDS.includes(key);
+  // filtro "somente tópicos em azul": esconde qualquer campo que não seja CTA/Legenda/CTA final
+  if(onlyBlueMode && !blueTone) return '';
   // Antes, campo vazio simplesmente não aparecia (return '') — isso escondia campos de
   // posts criados só com título/data, e dava a impressão de que não dava pra editá-los.
   // Agora o campo sempre aparece: fora do modo de edição mostra um "vazio" discreto;
@@ -1709,11 +2195,12 @@ function field(label, value, key){
   const editableAttr = editMode && key ? ` contenteditable="true" data-key="${key}"` : '';
   const displayValue = sug ? sug.text : (value || '');
   if(!displayValue && !editMode){
-    return `<div class="field"><div class="lbl">${label}</div><div class="val" style="color:var(--muted);font-style:italic;">(vazio)</div></div>`;
+    const emptyAttentionClass = blueTone ? ' attention' : '';
+    return `<div class="field${emptyAttentionClass}"><div class="lbl">${label}</div><div class="val" style="color:var(--muted);font-style:italic;">(vazio)</div></div>`;
   }
   const valClass = (sug && !editMode) ? ' has-suggestion' : '';
   const sugHtml = (sug && !editMode) ? `<div class="suggestion"><div class="sug-lbl">Sugestão de Edição de ${escapeHtml(sug.editor||'—')}</div><button type="button" class="sug-hist-btn" onclick="showFieldHistory(${idx}, '${key}')">Ver histórico</button></div>` : '';
-  const attentionClass = isAttentionField(key) ? ' attention' : '';
+  const attentionClass = (isAttentionField(key) || blueTone) ? ' attention' : '';
   return `<div class="field${attentionClass}"><div class="lbl">${label}</div><div class="val${valClass}"${editableAttr}>${displayValue}</div>${sugHtml}</div>`;
 }
 
@@ -1724,7 +2211,7 @@ function stageRatchetHtml(idx){
     <div class="stage-ratchet">
       <button type="button" class="sr-arrow" ${stage<=1?'disabled':''} onclick="moveToStage(${idx}, ${stage-1})" title="Etapa anterior">‹</button>
       <span class="sr-label">${KANBAN_STAGES[stage-1]}</span>
-      <button type="button" class="sr-arrow" ${stage>=10?'disabled':''} onclick="moveToStage(${idx}, ${stage+1})" title="Próxima etapa">›</button>
+      <button type="button" class="sr-arrow" ${stage>=KANBAN_STAGES.length?'disabled':''} onclick="moveToStage(${idx}, ${stage+1})" title="Próxima etapa">›</button>
     </div>
     <div class="kanban-dropdown-wrap" id="kanbanDropdownWrap">
       <button type="button" class="kanban-dropdown-btn" onclick="toggleKanbanDropdown()" aria-label="Mudar Kanban" title="Mudar Kanban">▾</button>
@@ -1777,8 +2264,13 @@ async function openPost(idx){
   currentPostIdx = idx;
   editMode = false;
   document.getElementById('backdrop').classList.add('active');
-  document.getElementById('modalBody').innerHTML = '<p style="padding:24px;color:#66758A;">Carregando...</p>';
+  const modalEl = document.getElementById('modalBody');
+  modalEl.innerHTML = '<p style="padding:24px;color:#66758A;">Carregando...</p>';
+  modalEl.scrollTop = 0;
   renderPostModal();
+  // sempre abre no topo do macro do post, independente de onde o usuário
+  // estava rolado da última vez que um post foi visualizado.
+  modalEl.scrollTop = 0;
 }
 
 // gera um link direto pro card (ex.: https://site/#post=42&campanha=<uuid>) e copia
@@ -1864,6 +2356,11 @@ function renderPostModal(){
     </div>
     <h2>${p['Segmento/Página']}</h2>
     <a class="url-link" href="${p['URL de apoio']}" target="_blank" rel="noopener">${p['URL de apoio']}</a>
+    ${postMediaPreviewHtml(idx,p)}
+    <label class="only-blue-toggle">
+      <input type="checkbox" id="onlyBlueCheckbox" ${onlyBlueMode?'checked':''} onchange="toggleOnlyBlueMode(this.checked)">
+      Mostrar somente os tópicos em azul (CTA / Legenda)
+    </label>
     ${isAllan() ? `
     <div style="display:flex;flex-wrap:wrap;gap:10px;margin:12px 0;padding:12px;border:1px dashed var(--border);border-radius:10px;background:#fbfcfe;">
       <label style="font-size:11.5px;color:var(--muted);">Título<br>
@@ -1907,6 +2404,11 @@ function renderPostModal(){
     ${extra}
     <div class="edit-toolbar" style="margin-top:8px;">${editActionButtonsHtml()}</div>
   `;
+}
+
+function toggleOnlyBlueMode(checked){
+  onlyBlueMode = !!checked;
+  renderPostModal();
 }
 
 function enterEditMode(){ requireLogin(() => { editMode = true; renderPostModal(); }); }
@@ -2610,6 +3112,9 @@ async function abrirModalLimpezaBackups(){
   const { data: backups, error } = await sb.from('calendar_backups').select('id, created_at, label').order('created_at', { ascending: false });
   if(error){ console.warn('Falha ao listar backups:', error); return; }
   const lista = backups || [];
+  // com menos de 3 backups acumulados, ainda não faz sentido incomodar o Allan pedindo
+  // pra limpar — a mensagem só aparece a partir de 3 backups salvos.
+  if(lista.length < 3) return;
   const rowsHtml = lista.length ? lista.map(b => {
     const quando = new Date(b.created_at).toLocaleString('pt-BR');
     return `<label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px;">
@@ -2686,6 +3191,6 @@ function setupScrollLock(){
   checarAvisoMensalLimpeza(); // só faz algo se a sessão restaurada for do Allan
 })();
 </script>
-<div class="version-badge">v0.3.0</div>
+<div class="version-badge">v0.4.0</div>
 </body>
 </html>
